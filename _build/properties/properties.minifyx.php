@@ -55,7 +55,22 @@ $tmp = array(
 		'xtype' => 'textfield',
 		'value' => 'MinifyX.css',
 	),
-
+    'jsGroups' => array(
+        'xtype' => 'textfield',
+        'value' => '',
+    ),
+    'cssGroups' => array(
+        'xtype' => 'textfield',
+        'value' => '',
+    ),
+    'preHooks' => array(
+        'xtype' => 'textfield',
+        'value' => '',
+    ),
+    'hooks' => array(
+        'xtype' => 'textfield',
+        'value' => '',
+    ),
 );
 
 foreach ($tmp as $k => $v) {

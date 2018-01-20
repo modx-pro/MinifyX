@@ -20,5 +20,5 @@ if ($dirs = @scandir($base)) {
 }
 
 // Clean vendors
-$base = $root . 'core/components/minifyx/munee/vendor/';
+$base = $root . 'core/components/minifyx/vendor/';
 cleanPackages($base);

@@ -1,23 +1,18 @@
 <?php
 
 switch ($modx->event->name) {
-
 	case 'OnSiteRefresh':
+        /** @var MinifyX $MinifyX */
 		if ($MinifyX = $modx->getService('minifyx','MinifyX', MODX_CORE_PATH.'components/minifyx/model/minifyx/')) {
-			/** @var MinifyX $MinifyX */
-			$MinifyX = new MinifyX($modx, array());
 			if ($MinifyX->clearCache()) {
 				$modx->log(modX::LOG_LEVEL_INFO, $modx->lexicon('refresh_default').': MinifyX');
 			}
 		}
 		break;
-
 	case 'OnWebPagePrerender':
 		$time = microtime(true);
 		// Process scripts and styles
 		if ($modx->getOption('minifyx_process_registered', null, false, true)) {
-			if (!$modx->getService('minifyx','MinifyX', MODX_CORE_PATH.'components/minifyx/model/minifyx/')) {return false;}
-
 			$current = array(
 				'head' => $modx->sjscripts,
 				'body' => $modx->jscripts,
@@ -70,9 +65,13 @@ switch ($modx->event->name) {
 				'jsFilename' => $modx->getOption('minifyx_jsFilename', null, 'all', true),
 				'cssFilename' => $modx->getOption('minifyx_cssFilename', null, 'all', true),
 			);
-
 			/** @var MinifyX $MinifyX */
-			$MinifyX = new MinifyX($modx, $scriptProperties);
+			if (isset($modx->minifyx) && $modx->minifyx instanceof MinifyX) {
+                $MinifyX = $modx->minifyx;
+                $MinifyX->reset($scriptProperties);
+            } else {
+                $MinifyX = $modx->getService('minifyx', 'MinifyX', MODX_CORE_PATH . 'components/minifyx/model/minifyx/', $scriptProperties);
+            }
 			if (!$MinifyX->prepareCacheFolder()) {
 				$this->modx->log(modX::LOG_LEVEL_ERROR, '[MinifyX] Could not create cache dir "'.$scriptProperties['cacheFolder'].'"');
 				return;

@@ -2,9 +2,10 @@
 /* define package */
 define('PKG_NAME','MinifyX');
 define('PKG_NAME_LOWER',strtolower(PKG_NAME));
-define('PKG_VERSION','1.4.4');
+define('PKG_VERSION','1.5.0');
 define('PKG_RELEASE','pl');
-define('PKG_AUTO_INSTALL', true);
+define('PKG_AUTO_INSTALL', false);
+define('PKG_PREPARE', false);
 
 /* define paths */
 if (isset($_SERVER['MODX_BASE_PATH'])) {
@@ -47,5 +48,6 @@ define('BUILD_SNIPPET_STATIC', false);
 define('BUILD_PLUGIN_STATIC', false);
 
 $BUILD_RESOLVERS = array(
-	'files'
+	'files',
+    'setup'
 );

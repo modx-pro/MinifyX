@@ -1,0 +1,1 @@
+MinifyX is a MODX® Revolution addon that allows to combine and minify JS and CSS files to speed up your site and reduce server load.

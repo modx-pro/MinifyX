@@ -6,7 +6,7 @@ $tstart = $mtime;
 set_time_limit(0);
 
 require_once 'build.config.php';
-if (file_exists('build.prepare.php')) {
+if (PKG_PREPARE && file_exists('build.prepare.php')) {
 	require_once 'build.prepare.php';
 }
 

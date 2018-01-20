@@ -1,15 +1,19 @@
 <?php
 
-require_once dirname(dirname(dirname(dirname(__FILE__)))) . '/config.core.php';
-require_once MODX_CORE_PATH . 'config/' . MODX_CONFIG_KEY . '.inc.php';
-
 if (!defined('MODX_API_MODE')) {
 	define('MODX_API_MODE', true);
 }
-require_once MODX_BASE_PATH . 'index.php';
+if (file_exists(dirname(dirname(dirname(dirname(__FILE__)))).'/index.php')) {
+    /** @noinspection PhpIncludeInspection */
+    require_once dirname(dirname(dirname(dirname(__FILE__)))).'/index.php';
+}
+else {
+    require_once dirname(dirname(dirname(dirname(dirname(__FILE__))))) . '/index.php';
+}
+$modx->getService('error','error.modError');
 
-if (!$modx->getService('minifyx','MinifyX', MODX_CORE_PATH.'components/minifyx/model/minifyx/')) {return false;}
-$MinifyX = new MinifyX($modx, array());
+$MinifyX = $modx->getService('minifyx','MinifyX', MODX_CORE_PATH.'components/minifyx/model/minifyx/');
+//$MinifyX = new MinifyX($modx, array());
 
 if (!empty($_GET['files'])) {
 	$files = $MinifyX->prepareFiles($_GET['files']);
