@@ -1,15 +1,25 @@
 Changelog for MinifyX
 
+1.6.0-pl (21.01.2018)
+==============
+- Added the method "getFileUrl" to the MinifyX class.
+- Added the method "getFilePath" to the MinifyX class.
+- Added the "forceUpdate" snippet parameters and the same system setting.
+- Added the "forceDelete" system setting to delete all files in the cache directory.
+- Added the "cssTpl" and "jsTpl" snippet parameters.
+- Added new register type "print" for immediate output.
+
+
 1.5.0-pl (19.01.2018)
 ==============
 - Updated all Munee dependencies. You can do it anytime via composer.
 - Added config file for groups (core/components/minifyx/config/groups.php).
-- Added "cssGroup" snippet parameter.
-- Added "jsGroup" snippet parameter.
-- Added "preHooks" snippet parameter. A hook can be either a snippet or a file, specified in the core/components/minifyx/hooks folder.
-- Added "hooks" snippet parameter. A hook can be either a snippet or a file, specified in the core/components/minifyx/hooks folder.
+- Added the "cssGroup" snippet parameter.
+- Added the "jsGroup" snippet parameter.
+- Added the "preHooks" snippet parameter. A hook can be either a snippet or a file, specified in the core/components/minifyx/hooks folder.
+- Added the "hooks" snippet parameter. A hook can be either a snippet or a file, specified in the core/components/minifyx/hooks folder.
 - Added the ability to run the snippet multiple times.
-- Added file hook "cssToPage" (&hook=`cssToPage.php`).
+- Added file hook "cssToPage" (&hooks=`cssToPage.php`).
 
 1.4.4-pl (16.05.2016)
 ==============

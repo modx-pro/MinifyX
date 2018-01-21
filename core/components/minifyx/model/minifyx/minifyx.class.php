@@ -7,10 +7,14 @@ class MinifyX {
     public $groups = array();
     /** @var array */
     protected $sources;
-    /** @var string */
+    /** @var string Content of the current processed file */
     protected $_content;
-    /** @var string */
+    /** @var string Name of the current processed file */
     protected $_filename;
+    /** @var string Type of the processed files */
+    protected $_filetype;
+    /** @var array List of all cached files */
+    protected $cachedFiles = array();
 
     function __construct(modX $modx,array $config = array()) {
         $this->modx = $modx;
@@ -40,13 +44,13 @@ class MinifyX {
             'registerJs' => 'default',
 
             'forceUpdate' => false,
+            'forceDelete' => false,
             'munee_cache' => MODX_CORE_PATH . 'cache/default/munee/',
             'hash_length' => 10,
             'hooksPath' => MODX_CORE_PATH . 'components/minifyx/hooks/',
             'hooks' => '',
             'preHooks' => '',
         ),$config);
-
         $this->config['jsExt'] = $this->config['minifyJs'] ? '.min.js' : '.js';
         $this->config['cssExt'] = $this->config['minifyCss'] ? '.min.css' : '.css';
         if (empty($this->config['cacheFolder'])) {
@@ -55,6 +59,11 @@ class MinifyX {
         $this->processParams();
         if (file_exists(MODX_CORE_PATH . 'components/minifyx/config/groups.php')) {
             $this->groups = include MODX_CORE_PATH . 'components/minifyx/config/groups.php';
+        }
+        if ($this->prepareCacheFolder()) {
+            $this->cachedFiles = $this->getCachedFiles();
+        } else {
+            $this->modx->log(modX::LOG_LEVEL_ERROR, '[MinifyX] Could not create cache dir "'.$this->config['cacheFolderPath'].'"');
         }
     }
     protected function processParams()
@@ -71,7 +80,6 @@ class MinifyX {
         foreach (array('jsGroups', 'cssGroups', 'jsSources', 'cssSources', 'hooks', 'preHooks') as $source) {
             $this->config[$source] = '';
         }
-        $this->config['outputCssTo'] = $this->config['outputJsTo'] = 'file';
         // ^^
         $this->setConfig($config);
         $this->processParams();
@@ -84,7 +92,6 @@ class MinifyX {
     {
         $this->config = array_merge($this->config, $config);
     }
-
     /**
      * Get all file groups or the specified one.
      * @param $group
@@ -233,20 +240,21 @@ class MinifyX {
         if (!is_array($style)) $style = $this->explodeParam($style);
         $this->config['cssSources'] = $style;
     }
+
     /**
      * Prepare string or array of files for Munee.
      *
      * @param array|string $files
-     *
+     * @param string $type Type of files
      * @return string
      */
-    public function prepareFiles($files) {
+    public function prepareFiles($files, $type = '') {
         if (is_string($files)) {
             $files = array_map('trim', explode(',', $files));
         }
         if (!is_array($files)) {return '';}
         $site_url = $this->modx->getOption('site_url');
-
+        $this->_filetype = $type;
         $output = array();
         foreach ($files as $file) {
             if (!empty($file) && $file[0] !== '-') {
@@ -350,8 +358,8 @@ class MinifyX {
             $path .= '/';
         }
 
-        $this->config['cacheFolder'] = MODX_BASE_PATH . $path;
-        return file_exists($this->config['cacheFolder']);
+        $this->config['cacheFolderPath'] = MODX_BASE_PATH . $path;
+        return file_exists($this->config['cacheFolderPath']);
     }
 
 
@@ -367,13 +375,12 @@ class MinifyX {
     public function getCachedFiles($prefix = '', $extension = '') {
         $cached = array();
 
-        $regexp = $prefix;
-        $regexp .= '[a-z0-9]{'.$this->config['hash_length'].'}.*';
+        $regexp = $prefix . '[a-z0-9]{'.$this->config['hash_length'].'}.*';
         if (!empty($extension)) {
             $regexp .= '?' . str_replace('.', '\.', $extension);
         }
 
-        $files = scandir($this->config['cacheFolder']);
+        $files = scandir($this->config['cacheFolderPath']);
         foreach ($files as $file) {
             if (preg_match("/$regexp/i", $file, $matches)) {
                 $cached[] = $file;
@@ -387,27 +394,32 @@ class MinifyX {
      * Save data in cache file
      *
      * @param $data
-     * @param string $prefix
-     * @param string $extension
      *
      * @return bool|string
      */
-    public function saveFile($data, $prefix = '', $extension = '') {
-        $cached = $this->getCachedFiles($prefix, $extension);
-        $hash = substr(sha1($data), 0, $this->config['hash_length']);
-        $this->_filename = $prefix . $hash . $extension;
+    public function saveFile($data) {
+        $filename = $this->config[$this->_filetype . 'Filename'];
+        if (pathinfo($filename, PATHINFO_EXTENSION) == $this->_filetype) {
+            $this->_filename = $filename;
+            if (file_exists($this->getFilePath())) $this->cachedFiles[] = $this->_filename;
+        } else {
+            $extension = $this->config[$this->_filetype.'Ext'];
+            $hash = substr(sha1($data), 0, $this->config['hash_length']);
+            $this->_filename = $filename . '_' . $hash . $extension;
+        }
         $this->setContent($data);
         $this->processHooks($this->config['hooks']);
-        $data = $this->getContent();
-        $tmp = array_flip($cached);
-        if (!isset($tmp[$this->_filename]) && !empty($this->_filename)) {
-            if (!file_put_contents($this->config['cacheFolder'] . $this->_filename, $data)) {
-                $this->modx->log(modX::LOG_LEVEL_ERROR, '[MinifyX] Could not save cache file '. $this->config['cacheFolder'] . $this->_filename);
+        if (empty($this->_filename)) return false;
+        $tmp = array_flip($this->cachedFiles);
+        if (!isset($tmp[$this->_filename]) || $this->config['forceUpdate']) {
+            if (!file_put_contents($this->getFilePath(), $this->getContent())) {
+                $this->modx->log(modX::LOG_LEVEL_ERROR, '[MinifyX] Could not save cache file '. $this->config['cacheFolderPath'] . $this->_filename);
                 return false;
             }
+            if (!isset($tmp[$this->_filename])) $this->cachedFiles[] = $this->_filename;
         }
 
-        return $this->_filename;
+        return file_exists($this->getFilePath());
     }
     /**
      * Get filename of the processed file.
@@ -459,6 +471,28 @@ class MinifyX {
     public function setContent($content)
     {
         return $this->_content = $content;
+    }
+
+    /**
+     * Get url of the cache file.
+     * @param string $file
+     * @return string
+     */
+    public function getFileUrl($file = null)
+    {
+        if (is_null($file)) $file = $this->getFilename();
+        return $this->config['cacheFolder'] . $file;
+    }
+
+    /**
+     * Get path of the cache file.
+     * @param string $file
+     * @return string
+     */
+    public function getFilePath($file = null)
+    {
+        if (is_null($file)) $file = $this->getFilename();
+        return $this->config['cacheFolderPath'] . $file;
     }
     /**
      * Recursive create of directories by specified path
@@ -533,12 +567,17 @@ class MinifyX {
      */
     public function clearCache() {
         if ($this->prepareCacheFolder()) {
-            $cached = $this->getCachedFiles();
-            foreach ($cached as $file) {
-                unlink($this->config['cacheFolder'] . $file);
+            if ($this->config['forceDelete']) {
+                foreach (new DirectoryIterator($this->config['cacheFolderPath']) as $file) {
+                    if ($file->isFile()) unlink($file->getPathname());
+                }
+            } else {
+                foreach ($this->cachedFiles as $file) {
+                    unlink($this->config['cacheFolderPath'] . $file);
+                }
             }
+            $this->cachedFiles = array();
         }
-
         if ($dir = $this->getTmpDir()) {
             return $this->removeDir($dir);
         }

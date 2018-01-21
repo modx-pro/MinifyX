@@ -37,6 +37,7 @@ $tmp = array(
 			array('name' => 'Placeholder', 'value' => 'placeholder'),
 			array('name' => 'Startup script', 'value' => 'startup'),
 			array('name' => 'Default', 'value' => 'default'),
+            array('name' => 'Print', 'value' => 'print'),
 		)
 	),
 	'jsPlaceholder' => array(
@@ -49,6 +50,7 @@ $tmp = array(
 		'options' => array(
 			array('name' => 'Placeholder', 'value' => 'placeholder'),
 			array('name' => 'Default', 'value' => 'default'),
+			array('name' => 'Print', 'value' => 'print'),
 		)
 	),
 	'cssPlaceholder' => array(
@@ -70,6 +72,14 @@ $tmp = array(
     'hooks' => array(
         'xtype' => 'textfield',
         'value' => '',
+    ),
+    'cssTpl' => array(
+        'xtype' => 'textfield',
+        'value' => '<link rel="stylesheet" href="[[+file]]" type="text/css" />',
+    ),
+    'jsTpl' => array(
+        'xtype' => 'textfield',
+        'value' => '<script type="text/javascript" src="[[+file]]"></script>',
     ),
 );
 

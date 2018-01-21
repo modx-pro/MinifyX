@@ -33,3 +33,7 @@ $_lang['setting_minifyx_processRawJs'] = 'Process raw javascript?';
 $_lang['setting_minifyx_processRawJs_desc'] = 'Do you want to move the raw javascript from the page to the file';
 $_lang['setting_minifyx_processRawCss'] = 'Process raw css?';
 $_lang['setting_minifyx_processRawCss_desc'] = 'Do you want to move the raw css from the page to the file?';
+$_lang['setting_minifyx_forceUpdate'] = 'Regenerate files.';
+$_lang['setting_minifyx_forceUpdate_desc'] = 'Disable check of files update and generate new scripts and styles each time.';
+$_lang['setting_minifyx_forceDelete'] = 'Remove all files.';
+$_lang['setting_minifyx_forceDelete_desc'] = 'Remove all files in the cache directory.';

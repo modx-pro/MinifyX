@@ -33,3 +33,7 @@ $_lang['setting_minifyx_processRawJs'] = 'Обрабатывать сырой ja
 $_lang['setting_minifyx_processRawJs_desc'] = 'Укажите, нужно ли переносить в файлы сырой javascript, который указан прямо на странице мужду тегами script?';
 $_lang['setting_minifyx_processRawCss'] = 'Обрабатывать сырой css?';
 $_lang['setting_minifyx_processRawCss_desc'] = 'Укажите, нужно ли переносить в файлы сырой css, который указан прямо на странице мужду тегами style?';
+$_lang['setting_minifyx_forceUpdate'] = 'Перезапивывать файлы.';
+$_lang['setting_minifyx_forceUpdate_desc'] = 'Отключить проверку изменения файлов и перезаписывать новые скрипты и стили каждый раз.';
+$_lang['setting_minifyx_forceDelete'] = 'Удалять все файлы.';
+$_lang['setting_minifyx_forceDelete_desc'] = 'Удаляются все файлы из директории для кэшированных файлов.';

@@ -50,11 +50,18 @@ $tmp = array(
 		'xtype' => 'textfield',
 		'value' => 'all',
 	),
-
 	'cacheFolder' => array(
 		'xtype' => 'textfield',
 		'value' => '/assets/components/minifyx/cache/',
 	),
+    'forceUpdate' => array(
+        'xtype' => 'combo-boolean',
+        'value' => false
+    ),
+    'forceDelete' => array(
+        'xtype' => 'combo-boolean',
+        'value' => false
+    ),
 );
 
 foreach ($tmp as $k => $v) {

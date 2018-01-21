@@ -73,10 +73,10 @@ switch ($modx->event->name) {
                 $MinifyX = $modx->getService('minifyx', 'MinifyX', MODX_CORE_PATH . 'components/minifyx/model/minifyx/', $scriptProperties);
             }
 			if (!$MinifyX->prepareCacheFolder()) {
-				$this->modx->log(modX::LOG_LEVEL_ERROR, '[MinifyX] Could not create cache dir "'.$scriptProperties['cacheFolder'].'"');
+				$this->modx->log(modX::LOG_LEVEL_ERROR, '[MinifyX] Could not create cache dir "'.$scriptProperties['cacheFolderPath'].'"');
 				return;
 			}
-			$cacheFolderUrl = MODX_BASE_URL . str_replace(MODX_BASE_PATH, '', $MinifyX->config['cacheFolder']);
+			//$cacheFolderUrl = $MinifyX->config['cacheFolder'];
 
 			// Process raw scripts and styles
 			$tmp_dir = $MinifyX->getTmpDir() . 'resources/' . $modx->resource->id . '/';
@@ -112,11 +112,9 @@ switch ($modx->event->name) {
 			foreach ($included as $key => $value) {
 				foreach ($value as $type => $files) {
 					if (empty($files)) {continue;}
-
-					$filename = $MinifyX->config[$type.'Filename'] . '_';
-					$extension = $MinifyX->config[$type.'Ext'];
-
-					$files = $MinifyX->prepareFiles(implode(',', $files));
+//					$filename = $MinifyX->config[$type.'Filename'] . '_';
+//					$extension = $MinifyX->config[$type.'Ext'];
+					$files = $MinifyX->prepareFiles($files, $type);
 					$properties = array(
 						'minify' => $MinifyX->config['minify'.ucfirst($type)]
 								? 'true'
@@ -124,10 +122,9 @@ switch ($modx->event->name) {
 					);
 
 					$result = $MinifyX->Munee($files, $properties);
-					$file = $MinifyX->saveFile($result, $filename, $extension);
-					if (!empty($file)) {
-						$prepared[$key][$type][] = $cacheFolderUrl . $file;
-					}
+					if ($MinifyX->saveFile($result)) {
+                        $prepared[$key][$type][] = $MinifyX->getFileUrl();
+                    }
 				}
 			}
 
