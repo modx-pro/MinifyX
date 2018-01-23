@@ -28,9 +28,7 @@ foreach ($sources as $type => $value) {
     $result = $MinifyX->Munee($files, $properties);
     // Register file on frontend
     if ($MinifyX->saveFile($result)) {
-        $tag = $type == 'css'
-            ? str_replace('[[+file]]', $MinifyX->getFileUrl(), $cssTpl)
-            : str_replace('[[+file]]', $MinifyX->getFileUrl(), $jsTpl);
+        $tag = str_replace('[[+file]]', $MinifyX->getFileUrl(), $type == 'css' ? $cssTpl : $jsTpl);
         switch ($register) {
         	case 'placeholder':
                 if ($register == 'placeholder' && $placeholder) {

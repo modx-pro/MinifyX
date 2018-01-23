@@ -44,7 +44,7 @@ class MinifyX {
             'registerJs' => 'default',
 
             'forceUpdate' => false,
-            'forceDelete' => false,
+            'forceDelete' => $this->modx->getOption('minifyx_forceDelete', null, false),
             'munee_cache' => MODX_CORE_PATH . 'cache/default/munee/',
             'hash_length' => 10,
             'hooksPath' => MODX_CORE_PATH . 'components/minifyx/hooks/',
@@ -71,6 +71,7 @@ class MinifyX {
         foreach (array('jsGroups', 'cssGroups', 'jsSources', 'cssSources', 'hooks', 'preHooks') as $source) {
             $this->config[$source] = $this->explodeParam($this->config[$source]);
         }
+
     }
 
     public function reset(array $config = array())
@@ -441,19 +442,24 @@ class MinifyX {
 
     /**
      * Check if the process file is javascript file.
+     * @param string $file
      * @return bool
      */
-    public function isJs()
+    public function isJs($file = null)
     {
-        return isset($this->_filename) ? pathinfo($this->_filename, PATHINFO_EXTENSION) == 'js' : false;
+        $file = $file ?: $this->_filename;
+        return isset($file) ? pathinfo($file, PATHINFO_EXTENSION) == 'js' : false;
     }
+
     /**
      * Check if the process file is javascript file.
+     * @param string $file
      * @return bool
      */
-    public function isCss()
+    public function isCss($file = null)
     {
-        return isset($this->_filename) ? pathinfo($this->_filename, PATHINFO_EXTENSION) == 'css' : false;
+        $file = $file ?: $this->_filename;
+        return isset($file) ? pathinfo($file, PATHINFO_EXTENSION) == 'css' : false;
     }
     /**
      * Get content of the processed file.

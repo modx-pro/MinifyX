@@ -81,6 +81,10 @@ $tmp = array(
         'xtype' => 'textfield',
         'value' => '<script type="text/javascript" src="[[+file]]"></script>',
     ),
+    'forceUpdate' => array(
+        'xtype' => 'combo-boolean',
+        'value' => false
+    ),
 );
 
 foreach ($tmp as $k => $v) {

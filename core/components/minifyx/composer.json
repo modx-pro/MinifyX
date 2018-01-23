@@ -1,5 +1,14 @@
 {
     "require": {
+        "php": ">=5.6.0",
         "meenie/Munee": "^1.7"
-    }
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/sergant210/munee"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }

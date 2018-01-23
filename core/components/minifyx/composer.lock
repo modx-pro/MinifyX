@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "2ff702b718dee1c4d39e97abd43c8079",
-    "content-hash": "583921a05b51365c7d0ab11612f1c4a2",
+    "hash": "4dbf0795ec7757eec4d09cc3fa59f1d9",
+    "content-hash": "92e4c16e4d08f5b70eae1658216a9de6",
     "packages": [
         {
             "name": "coffeescript/coffeescript",
@@ -53,23 +53,24 @@
         },
         {
             "name": "imagine/imagine",
-            "version": "0.6.2",
+            "version": "v0.7.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/avalanche123/Imagine.git",
-                "reference": "83ca8babede0e54f935ec09d55a726bf4b0a3f7c"
+                "reference": "a9a702a946073cbca166718f1b02a1e72d742daa"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/avalanche123/Imagine/zipball/83ca8babede0e54f935ec09d55a726bf4b0a3f7c",
-                "reference": "83ca8babede0e54f935ec09d55a726bf4b0a3f7c",
+                "url": "https://api.github.com/repos/avalanche123/Imagine/zipball/a9a702a946073cbca166718f1b02a1e72d742daa",
+                "reference": "a9a702a946073cbca166718f1b02a1e72d742daa",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.3.2"
             },
             "require-dev": {
-                "sami/sami": "dev-master"
+                "sami/sami": "^3.3",
+                "symfony/phpunit-bridge": "^3.2"
             },
             "suggest": {
                 "ext-gd": "to use the GD implementation",
@@ -106,44 +107,41 @@
                 "image manipulation",
                 "image processing"
             ],
-            "time": "2014-11-11 11:36:02"
+            "time": "2017-05-16 10:31:22"
         },
         {
             "name": "leafo/scssphp",
-            "version": "v0.1.1",
+            "version": "v0.7.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/leafo/scssphp.git",
-                "reference": "8c08da585537e97efd528c7d278463d2b9396371"
+                "reference": "d7296256bd1bfacb8bd24e69030fd5e187181835"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/leafo/scssphp/zipball/8c08da585537e97efd528c7d278463d2b9396371",
-                "reference": "8c08da585537e97efd528c7d278463d2b9396371",
+                "url": "https://api.github.com/repos/leafo/scssphp/zipball/d7296256bd1bfacb8bd24e69030fd5e187181835",
+                "reference": "d7296256bd1bfacb8bd24e69030fd5e187181835",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.3.0"
+                "php": ">=5.4.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "3.7.*"
+                "phpunit/phpunit": "~4.6",
+                "squizlabs/php_codesniffer": "~2.5"
             },
             "bin": [
                 "bin/pscss"
             ],
             "type": "library",
             "autoload": {
-                "classmap": [
-                    "classmap.php"
-                ],
                 "psr-4": {
                     "Leafo\\ScssPhp\\": "src/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
-                "MIT",
-                "GPL-3.0"
+                "MIT"
             ],
             "authors": [
                 {
@@ -153,7 +151,7 @@
                 }
             ],
             "description": "scssphp is a compiler for SCSS written in PHP.",
-            "homepage": "http://leafo.net/scssphp/",
+            "homepage": "http://leafo.github.io/scssphp/",
             "keywords": [
                 "css",
                 "less",
@@ -161,7 +159,73 @@
                 "scss",
                 "stylesheet"
             ],
-            "time": "2014-08-12 22:41:53"
+            "time": "2017-12-21 00:18:53"
+        },
+        {
+            "name": "meenie/Munee",
+            "version": "1.7.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/sergant210/munee.git",
+                "reference": "bc00d524e72c15b653c7df7cf203f6129ce028d9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/sergant210/munee/zipball/bc00d524e72c15b653c7df7cf203f6129ce028d9",
+                "reference": "bc00d524e72c15b653c7df7cf203f6129ce028d9",
+                "shasum": ""
+            },
+            "require": {
+                "coffeescript/coffeescript": "~1.3",
+                "imagine/imagine": "^0.7",
+                "leafo/scssphp": "^0.7",
+                "meenie/javascript-packer": "~1.1",
+                "oyejorge/less.php": "~1.7.0",
+                "php": ">=5.4.0",
+                "sabberworm/php-css-parser": "^8.0",
+                "tedivm/jshrink": "^1.3",
+                "tubalmartin/cssmin": "~4.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Munee\\": "src/Munee"
+                },
+                "files": [
+                    "config/bootstrap.php"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Cody Lundquist",
+                    "email": "cody.lundquist@gmail.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Standalone PHP 5.3 Asset Optimisation & Manipulation - On-The-Fly Image Resizing, On-the-fly LESS, SCSS, CoffeeScript Compiling, CSS & JavaScript Combining/Minifying, and Smart Client Side and Server Side Caching",
+            "homepage": "http://mun.ee",
+            "keywords": [
+                "asset management",
+                "asset optimisation",
+                "asset optimization",
+                "cache",
+                "coffeescript",
+                "css",
+                "image manipulation",
+                "javascript",
+                "less",
+                "lessphp",
+                "php",
+                "scss",
+                "scssphp"
+            ],
+            "support": {
+                "source": "https://github.com/sergant210/munee/tree/1.7.2"
+            },
+            "time": "2018-01-21 15:50:07"
         },
         {
             "name": "meenie/javascript-packer",
@@ -201,85 +265,24 @@
             "time": "2013-03-25 21:54:33"
         },
         {
-            "name": "meenie/munee",
-            "version": "1.7.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/meenie/munee.git",
-                "reference": "859b5149543c5a18bc54ad6180c24b16ed07c50f"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/meenie/munee/zipball/859b5149543c5a18bc54ad6180c24b16ed07c50f",
-                "reference": "859b5149543c5a18bc54ad6180c24b16ed07c50f",
-                "shasum": ""
-            },
-            "require": {
-                "coffeescript/coffeescript": "1.3.1",
-                "imagine/imagine": "0.6.2",
-                "leafo/scssphp": "0.1.1",
-                "meenie/javascript-packer": "1.1",
-                "oyejorge/less.php": "1.7.0.5",
-                "php": ">=5.3.2",
-                "sabberworm/php-css-parser": "7.0.0",
-                "tedivm/jshrink": "1.0.1",
-                "tubalmartin/cssmin": "~2.4"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Munee\\": "src/Munee"
-                },
-                "files": [
-                    "config/bootstrap.php"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Cody Lundquist",
-                    "email": "cody.lundquist@gmail.com",
-                    "role": "Developer"
-                }
-            ],
-            "description": "Standalone PHP 5.3 Asset Optimisation & Manipulation - On-The-Fly Image Resizing, On-the-fly LESS, SCSS, CoffeeScript Compiling, CSS & JavaScript Combining/Minifying, and Smart Client Side and Server Side Caching",
-            "homepage": "http://mun.ee",
-            "keywords": [
-                "asset management",
-                "asset optimisation",
-                "asset optimization",
-                "cache",
-                "coffeescript",
-                "css",
-                "image manipulation",
-                "javascript",
-                "less",
-                "lessphp",
-                "php",
-                "scss",
-                "scssphp"
-            ],
-            "time": "2017-02-08 17:45:04"
-        },
-        {
             "name": "oyejorge/less.php",
-            "version": "v1.7.0.5",
+            "version": "v1.7.0.14",
             "source": {
                 "type": "git",
                 "url": "https://github.com/oyejorge/less.php.git",
-                "reference": "4385036b1dbfaf37f5380bd26a1e6006fc43149f"
+                "reference": "42925c5a01a07d67ca7e82dfc8fb31814d557bc9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/oyejorge/less.php/zipball/4385036b1dbfaf37f5380bd26a1e6006fc43149f",
-                "reference": "4385036b1dbfaf37f5380bd26a1e6006fc43149f",
+                "url": "https://api.github.com/repos/oyejorge/less.php/zipball/42925c5a01a07d67ca7e82dfc8fb31814d557bc9",
+                "reference": "42925c5a01a07d67ca7e82dfc8fb31814d557bc9",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.3"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~4.8.24"
             },
             "bin": [
                 "bin/lessc"
@@ -311,7 +314,7 @@
                     "homepage": "https://github.com/oyejorge"
                 }
             ],
-            "description": "PHP port of the Javascript version of LESS http://lesscss.org",
+            "description": "PHP port of the Javascript version of LESS http://lesscss.org (Originally maintained by Josh Schmidt)",
             "homepage": "http://lessphp.gpeasy.com",
             "keywords": [
                 "css",
@@ -321,24 +324,27 @@
                 "php",
                 "stylesheet"
             ],
-            "time": "2015-07-13 20:34:18"
+            "time": "2017-03-28 22:19:25"
         },
         {
             "name": "sabberworm/php-css-parser",
-            "version": "7.0.0",
+            "version": "8.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sabberworm/PHP-CSS-Parser.git",
-                "reference": "1e0b1faadd4a75c22ef90e7be57e04e38e59f6cf"
+                "reference": "850cbbcbe7fbb155387a151ea562897a67e242ef"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sabberworm/PHP-CSS-Parser/zipball/1e0b1faadd4a75c22ef90e7be57e04e38e59f6cf",
-                "reference": "1e0b1faadd4a75c22ef90e7be57e04e38e59f6cf",
+                "url": "https://api.github.com/repos/sabberworm/PHP-CSS-Parser/zipball/850cbbcbe7fbb155387a151ea562897a67e242ef",
+                "reference": "850cbbcbe7fbb155387a151ea562897a67e242ef",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.3.2"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "*"
             },
             "type": "library",
             "autoload": {
@@ -362,29 +368,29 @@
                 "parser",
                 "stylesheet"
             ],
-            "time": "2015-08-24 09:08:39"
+            "time": "2016-07-19 19:14:21"
         },
         {
             "name": "tedivm/jshrink",
-            "version": "v1.0.1",
+            "version": "v1.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/tedious/JShrink.git",
-                "reference": "7575d9d96f113bc7c1c28ec8231ee086751a9078"
+                "reference": "68ce379b213741e86f02bf6053b0d26b9f833448"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tedious/JShrink/zipball/7575d9d96f113bc7c1c28ec8231ee086751a9078",
-                "reference": "7575d9d96f113bc7c1c28ec8231ee086751a9078",
+                "url": "https://api.github.com/repos/tedious/JShrink/zipball/68ce379b213741e86f02bf6053b0d26b9f833448",
+                "reference": "68ce379b213741e86f02bf6053b0d26b9f833448",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.3.0"
+                "php": "^5.6|^7.0"
             },
             "require-dev": {
-                "fabpot/php-cs-fixer": "0.4.0",
-                "phpunit/phpunit": "4.0.*",
-                "satooshi/php-coveralls": "dev-master"
+                "friendsofphp/php-cs-fixer": "^2.8",
+                "php-coveralls/php-coveralls": "^1.1.0",
+                "phpunit/phpunit": "^6"
             },
             "type": "library",
             "autoload": {
@@ -408,33 +414,38 @@
                 "javascript",
                 "minifier"
             ],
-            "time": "2014-11-11 03:54:14"
+            "time": "2017-12-08 00:59:56"
         },
         {
             "name": "tubalmartin/cssmin",
-            "version": "v2.4.8-p10",
+            "version": "v4.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/tubalmartin/YUI-CSS-compressor-PHP-port.git",
-                "reference": "9c640e5d2d6fe1eac2167ff138b8b0ce39475d03"
+                "reference": "3cbf557f4079d83a06f9c3ff9b957c022d7805cf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tubalmartin/YUI-CSS-compressor-PHP-port/zipball/9c640e5d2d6fe1eac2167ff138b8b0ce39475d03",
-                "reference": "9c640e5d2d6fe1eac2167ff138b8b0ce39475d03",
+                "url": "https://api.github.com/repos/tubalmartin/YUI-CSS-compressor-PHP-port/zipball/3cbf557f4079d83a06f9c3ff9b957c022d7805cf",
+                "reference": "3cbf557f4079d83a06f9c3ff9b957c022d7805cf",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.0.0"
+                "ext-pcre": "*",
+                "php": ">=5.3.2"
             },
             "require-dev": {
-                "cogpowered/finediff": "0.3.*"
+                "cogpowered/finediff": "0.3.*",
+                "phpunit/phpunit": "4.8.*"
             },
+            "bin": [
+                "cssmin"
+            ],
             "type": "library",
             "autoload": {
-                "classmap": [
-                    "cssmin.php"
-                ]
+                "psr-4": {
+                    "tubalmartin\\CssMin\\": "src"
+                }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -456,15 +467,17 @@
                 "minify",
                 "yui"
             ],
-            "time": "2017-04-04 14:38:03"
+            "time": "2018-01-15 15:26:51"
         }
     ],
     "packages-dev": [],
     "aliases": [],
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "stability-flags": [],
-    "prefer-stable": false,
+    "prefer-stable": true,
     "prefer-lowest": false,
-    "platform": [],
+    "platform": {
+        "php": ">=5.4.0"
+    },
     "platform-dev": []
 }

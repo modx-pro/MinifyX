@@ -21,3 +21,4 @@ $_lang['minifyx_prop_preHooks'] = 'Comma separated list of hooks that are execut
 $_lang['minifyx_prop_hooks'] = 'Comma separated list of hooks that are executed after processing. A hook can be a snippet or file.';
 $_lang['minifyx_prop_cssTpl'] = 'Css file template for output. Placeholder "[[+file]]" must exists.';
 $_lang['minifyx_prop_jsTpl'] = 'Template fo js file. Placeholder "[[+file]]" must exists.';
+$_lang['minifyx_prop_forceUpdate'] = 'Disable check of files update and resave new scripts and styles each time.';
