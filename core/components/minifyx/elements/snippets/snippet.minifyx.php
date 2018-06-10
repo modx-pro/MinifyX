@@ -39,6 +39,9 @@ foreach ($sources as $type => $value) {
                 return $tag;
             default:
                 if ($type == 'css') {
+                    if ($register == 'inline') {
+                        $tag = '<style>'.$MinifyX->getContent().'</style>';
+                    } 
                     $modx->regClientCSS($tag);
                 }
                 else {
