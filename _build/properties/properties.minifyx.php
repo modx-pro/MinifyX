@@ -51,6 +51,7 @@ $tmp = array(
 			array('name' => 'Placeholder', 'value' => 'placeholder'),
 			array('name' => 'Default', 'value' => 'default'),
 			array('name' => 'Print', 'value' => 'print'),
+			array('name' => 'Inline', 'value' => 'inline'),
 		)
 	),
 	'cssPlaceholder' => array(
