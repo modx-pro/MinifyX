@@ -7,8 +7,9 @@ $tmp = array(
 		'file' => 'minifyx',
 		'description' => '',
 		'events' => array(
-			'OnWebPagePrerender' => array(),
+			'OnWebPagePrerender' => array('priority' => 1000),
 			'OnSiteRefresh' => array(),
+			'OnMODXInit' => array(),
 		),
 	)
 );

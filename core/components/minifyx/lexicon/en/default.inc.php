@@ -20,6 +20,8 @@ $_lang['setting_minifyx_minifyJs'] = 'Compress javascript?';
 $_lang['setting_minifyx_minifyJs_desc'] = 'You can enable compression javascript compression. All files that have suffix .min in the name will be skipped.';
 $_lang['setting_minifyx_minifyCss'] = 'Compress css?';
 $_lang['setting_minifyx_minifyCss_desc'] = 'You can enable compression css compression. All files that have suffix .min in the name will be skipped.';
+$_lang['setting_minifyx_minifyHtml'] = 'Compress HTML?';
+$_lang['setting_minifyx_minifyHtml_desc'] = 'Compress the page content before output.';
 
 $_lang['setting_minifyx_cssFilename'] = 'Css filename';
 $_lang['setting_minifyx_cssFilename_desc'] = 'Specify the name of the prepared css file that will contain all processed scripts. To it will be added the time of creation and suffix .min, if compression is enabled.';

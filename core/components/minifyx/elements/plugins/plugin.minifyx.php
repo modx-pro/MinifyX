@@ -1,6 +1,12 @@
 <?php
 
 switch ($modx->event->name) {
+	case 'OnMODXInit':
+        $file = $modx->getOption('minifyx_core_path', null, MODX_CORE_PATH) . 'components/minifyx/functions/function.php';
+        if (file_exists($file)) {
+            include_once $file;
+        }
+		break;
 	case 'OnSiteRefresh':
         /** @var MinifyX $MinifyX */
 		if ($MinifyX = $modx->getService('minifyx','MinifyX', MODX_CORE_PATH.'components/minifyx/model/minifyx/')) {
@@ -162,7 +168,6 @@ switch ($modx->event->name) {
 				$modx->resource->_output
 			);
 		}
-
 		// Process images
 		if ($modx->getOption('minifyx_process_images', null, false, true)) {
 			if (!$modx->getService('minifyx','MinifyX', MODX_CORE_PATH.'components/minifyx/model/minifyx/')) {return false;}
@@ -234,6 +239,13 @@ switch ($modx->event->name) {
 				);
 			}
 		}
+		// Minify the page content
+        if ($modx->getOption('minifyx_minifyHtml', null, false)) {
+            $output = $modx->resource->_output;
+            $output = preg_replace('/<!--.*-->/', '', $output);
+            $output = preg_replace('/\s+/', ' ', $output);
+            $modx->resource->_output = $output;
+        }
 
 		$modx->log(modX::LOG_LEVEL_INFO, '[MinifyX] Total time for page "'.$modx->resource->id.'" = '.(microtime(true) - $time));
 		break;

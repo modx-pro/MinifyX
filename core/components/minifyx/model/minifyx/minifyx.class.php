@@ -15,12 +15,14 @@ class MinifyX {
     protected $_filetype;
     /** @var array List of all cached files */
     protected $cachedFiles = array();
+    /** @var array  */
+    protected $parameters = array('jsGroups', 'cssGroups', 'jsSources', 'cssSources', 'hooks', 'preHooks');
 
     function __construct(modX $modx,array $config = array()) {
         $this->modx = $modx;
 
-        $corePath = $this->modx->getOption('core_path').'components/minifyx/';
-        $assetsPath = $this->modx->getOption('assets_path').'components/minifyx/';
+        $corePath = $this->modx->getOption('minifyx_core_path', $config, $this->modx->getOption('core_path')) . 'components/minifyx/';
+        $assetsPath = $this->modx->getOption('minifyx_assets_path', $config, $this->modx->getOption('assets_path')) . 'components/minifyx/';
         $this->config = array_merge(array(
             'corePath' => $corePath,
             'modelPath' => $corePath.'model/',
@@ -43,13 +45,19 @@ class MinifyX {
             'registerCss' => 'default',
             'registerJs' => 'default',
 
-            'forceUpdate' => false,
+            'jsPlaceholder' => 'MinifyX.javascript',
+            'cssPlaceholder' => 'MinifyX.css',
+
+            'forceUpdate' => $modx->context->key == 'mgr' ? true : false,
             'forceDelete' => $this->modx->getOption('minifyx_forceDelete', null, false),
             'munee_cache' => MODX_CORE_PATH . 'cache/default/munee/',
             'hash_length' => 10,
             'hooksPath' => MODX_CORE_PATH . 'components/minifyx/hooks/',
             'hooks' => '',
             'preHooks' => '',
+            'jsTpl' => '<script src="[[+file]]"></script>',
+            'cssTpl' => '<link rel="stylesheet" href="[[+file]]" type="text/css">',
+            'version' => '',
         ),$config);
         $this->config['jsExt'] = $this->config['minifyJs'] ? '.min.js' : '.js';
         $this->config['cssExt'] = $this->config['minifyCss'] ? '.min.css' : '.css';
@@ -66,9 +74,10 @@ class MinifyX {
             $this->modx->log(modX::LOG_LEVEL_ERROR, '[MinifyX] Could not create cache dir "'.$this->config['cacheFolderPath'].'"');
         }
     }
+
     protected function processParams()
     {
-        foreach (array('jsGroups', 'cssGroups', 'jsSources', 'cssSources', 'hooks', 'preHooks') as $source) {
+        foreach ($this->parameters as $source) {
             $this->config[$source] = $this->explodeParam($this->config[$source]);
         }
 
@@ -78,7 +87,7 @@ class MinifyX {
     {
         $this->_filename = $this->_content = '';
         // vv For plugin vv
-        foreach (array('jsGroups', 'cssGroups', 'jsSources', 'cssSources', 'hooks', 'preHooks') as $source) {
+        foreach ($this->parameters as $source) {
             $this->config[$source] = '';
         }
         // ^^
@@ -193,6 +202,7 @@ class MinifyX {
         if (!is_array($group)) $group = $this->explodeParam($group);
         $this->config['jsGroups'] = $group;
     }
+
     public function addCssGroup($group)
     {
         if (!empty($group)) {
@@ -200,15 +210,18 @@ class MinifyX {
             $this->config['cssGroups'] = array_merge($this->config['cssGroups'], $group);
         }
     }
+
     public function getCssGroup($group = null)
     {
         return !empty($group) ? $this->config['cssGroups'][$group] : $this->config['cssGroups'];
     }
+
     public function setCssGroup($group)
     {
         if (!is_array($group)) $group = $this->explodeParam($group);
         $this->config['cssGroups'] = $group;
     }
+
     public function addJsSource($script)
     {
         if (!empty($script)) {
@@ -216,15 +229,18 @@ class MinifyX {
             $this->config['jsSources'] = array_merge($this->config['jsSources'], $script);
         }
     }
+
     public function getJsSource($script)
     {
         return !empty($script) ? $this->config['jsSources'][$script] : $this->config['jsSources'];
     }
+
     public function setJsSource($script)
     {
         if (!is_array($script)) $script = $this->explodeParam($script);
         $this->config['jsSources'] = $script;
     }
+
     public function addCssSource($style)
     {
         if (!empty($style)) {
@@ -232,10 +248,12 @@ class MinifyX {
             $this->config['cssSources'] = array_merge($this->config['cssSources'], $style);
         }
     }
+
     public function getCssSource($style)
     {
         return !empty($style) ? $this->config['cssSources'][$style] : $this->config['cssSources'];
     }
+
     public function setCssSource($style)
     {
         if (!is_array($style)) $style = $this->explodeParam($style);
@@ -262,7 +280,7 @@ class MinifyX {
                 $file = str_replace(MODX_BASE_PATH, '', $file);
                 $file = str_replace($site_url, '', $file);
 
-                if (!preg_match('#(http|https)://#', $file) && $file[0] != '/') {
+                if (!preg_match('#https?:\/\/#', $file) && $file[0] != '/') {
                     $file = '/' . $file;
                 }
 
@@ -285,7 +303,6 @@ class MinifyX {
 
         return implode(',', $output);
     }
-
 
     /**
      * Process files with Munee library
@@ -342,7 +359,6 @@ class MinifyX {
         }
     }
 
-
     /**
      * Checks and creates cache dir for storing prepared scripts and styles
      *
@@ -362,8 +378,6 @@ class MinifyX {
         $this->config['cacheFolderPath'] = MODX_BASE_PATH . $path;
         return file_exists($this->config['cacheFolderPath']);
     }
-
-
 
     /**
      * Get the latest cached files for current options
@@ -422,6 +436,7 @@ class MinifyX {
 
         return file_exists($this->getFilePath());
     }
+
     /**
      * Get filename of the processed file.
      * @return string
@@ -430,6 +445,7 @@ class MinifyX {
     {
         return $this->_filename;
     }
+
     /**
      * Set a filename for the processed file.
      * @param string $name
@@ -461,6 +477,7 @@ class MinifyX {
         $file = $file ?: $this->_filename;
         return isset($file) ? pathinfo($file, PATHINFO_EXTENSION) == 'css' : false;
     }
+
     /**
      * Get content of the processed file.
      * @return string
@@ -469,6 +486,7 @@ class MinifyX {
     {
         return $this->_content;
     }
+
     /**
      * Set new content.
      * @param string $content
@@ -526,6 +544,7 @@ class MinifyX {
         }
         return file_exists($path);
     }
+
     /**
      * Recursive remove of a directory
      *
@@ -551,6 +570,7 @@ class MinifyX {
 
         return !file_exists($dir);
     }
+
     /**
      * Prepares and returns path to temporary directory for storing Munee cache
      *
@@ -566,6 +586,7 @@ class MinifyX {
             return false;
         }
     }
+    
     /**
      * Removes cache files
      *
@@ -589,5 +610,96 @@ class MinifyX {
         }
 
         return false;
+    }
+
+    public function getVersion()
+    {
+        $version = '';
+        if(!empty($this->config['version'])) {
+            $version = '?v=' . (($this->config['version'] == 'auto') ? substr(sha1($this->getContent()), 0, 6) : $this->config['version']);
+        }
+        return $version;
+    }
+
+    public function minify($value = true)
+    {
+        $this->config['minifyJs'] = $this->config['minifyCss'] = (bool) $value;
+        return $this;
+    }
+
+    public function run()
+    {
+        $sources = $this->prepareSources();
+
+        foreach ($sources as $type => $value) {
+            if (empty($value)) {continue;}
+            $register = $this->config['register'.ucfirst($type)];
+            $placeholder = !empty($this->config[$type.'Placeholder'])
+                ? $this->config[$type.'Placeholder']
+                : '';
+
+            $files = $this->prepareFiles($value, $type);
+            $properties = array(
+                'minify' => $this->config['minify'.ucfirst($type)]
+                    ? 'true'
+                    : 'false',
+            );
+            $result = $this->Munee($files, $properties);
+            // Register file on frontend
+            if ($this->saveFile($result) && $this->modx->context->key != 'mgr') {
+                $link = $this->getFileUrl() . (!empty($this->config['version']) ? $this->getVersion() : '');
+                $tag = str_replace('[[+file]]', $link, $type == 'css' ? $this->config['cssTpl'] : $this->config['jsTpl']);
+                switch ($register) {
+                    case 'placeholder':
+                        if ($register == 'placeholder' && $placeholder) {
+                            $this->modx->setPlaceholder($placeholder, $tag);
+                        }
+                        break;
+                    case 'print':
+                        return $tag;
+                    case 'default':
+                        if ($type == 'css') {
+                            $this->modx->regClientCSS($tag);
+                        }
+                        else {
+                            if ($register == 'startup') {
+                                $this->modx->regClientStartupScript($tag);
+                            }
+                            else {
+                                $this->modx->regClientScript($tag);
+                            }
+                        }
+                        break;
+                    default:
+                }
+            }
+        }
+        return $this->modx->context->key == 'mgr' ? $this->getFileUrl() : '';
+    }
+
+    public function cacheFolder($path)
+    {
+        if (!empty($path)) {
+            $this->config['cacheFolder'] = $path;
+            if (!$this->prepareCacheFolder()) {
+                $this->modx->log(1, "Can't create the specified cache folder!");
+            };
+        }
+        return $this;
+    }
+
+    public function __call($key, $parameters)
+    {
+        if (isset($this->config[$key])) {
+            $this->config[$key] = (in_array($key, $this->parameters))
+                ? $this->explodeParam($parameters[0])
+                : $parameters[0];
+        }
+        return $this;
+    }
+
+    public function __toString()
+    {
+        return $this->run();
     }
 }

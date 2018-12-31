@@ -1,5 +1,12 @@
 Changelog for MinifyX
 
+1.7.0-pl (30.12.2018)
+==============
+- Added php function "minify" to manage assets from the php code.
+- Added the ability to minify content.
+- Added the ability to use version for assets.
+- Updated composer dependencies.
+
 1.6.0-pl (22.01.2018)
 ==============
 - Updated all Munee dependencies. You can do it anytime via composer.

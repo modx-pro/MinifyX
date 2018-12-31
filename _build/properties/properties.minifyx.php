@@ -20,7 +20,6 @@ $tmp = array(
 		'value' => false
 	),
 
-
 	'jsFilename' => array(
 		'xtype' => 'textfield',
 		'value' => 'scripts',
@@ -79,11 +78,15 @@ $tmp = array(
     ),
     'jsTpl' => array(
         'xtype' => 'textfield',
-        'value' => '<script type="text/javascript" src="[[+file]]"></script>',
+        'value' => '<script src="[[+file]]"></script>',
     ),
     'forceUpdate' => array(
         'xtype' => 'combo-boolean',
         'value' => false
+    ),
+    'version' => array(
+        'xtype' => 'textfield',
+        'value' => '',
     ),
 );
 

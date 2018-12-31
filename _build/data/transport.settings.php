@@ -62,6 +62,10 @@ $tmp = array(
         'xtype' => 'combo-boolean',
         'value' => false
     ),
+    'minifyHtml' => array(
+        'xtype' => 'combo-boolean',
+        'value' => false
+    ),
 );
 
 foreach ($tmp as $k => $v) {
