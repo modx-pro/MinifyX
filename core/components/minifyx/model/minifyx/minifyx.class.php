@@ -657,7 +657,7 @@ class MinifyX {
                         break;
                     case 'print':
                         return $tag;
-                    case 'default':
+                    default:
                         if ($type == 'css') {
                             $this->modx->regClientCSS($tag);
                         }
@@ -669,8 +669,6 @@ class MinifyX {
                                 $this->modx->regClientScript($tag);
                             }
                         }
-                        break;
-                    default:
                 }
             }
         }
