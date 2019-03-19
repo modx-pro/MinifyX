@@ -1,6 +1,8 @@
 <?php
-/** @var array $scriptProperties */
-/** @var MinifyX $MinifyX */
+/**
+ * @var array $scriptProperties
+ * @var MinifyX $MinifyX
+ */
 if (isset($modx->minifyx) && $modx->minifyx instanceof MinifyX) {
     $MinifyX = $modx->minifyx;
     $MinifyX->reset($scriptProperties);

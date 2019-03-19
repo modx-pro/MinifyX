@@ -1,103 +1,103 @@
 <?php
-$properties = array();
+$properties = [];
 
-$tmp = array(
-	'jsSources' => array(
-		'xtype' => 'textfield',
-		'value' => '',
-	),
-	'cssSources' => array(
-		'xtype' => 'textfield',
-		'value' => '',
-	),
-
-	'minifyJs' => array(
-		'xtype' => 'combo-boolean',
-		'value' => false
-	),
-	'minifyCss' => array(
-		'xtype' => 'combo-boolean',
-		'value' => false
-	),
-
-	'jsFilename' => array(
-		'xtype' => 'textfield',
-		'value' => 'scripts',
-	),
-	'cssFilename' => array(
-		'xtype' => 'textfield',
-		'value' => 'styles',
-	),
-
-	'registerJs' => array(
-		'xtype' => 'list',
-		'value' => 'placeholder',
-		'options' => array(
-			array('name' => 'Placeholder', 'value' => 'placeholder'),
-			array('name' => 'Startup script', 'value' => 'startup'),
-			array('name' => 'Default', 'value' => 'default'),
-            array('name' => 'Print', 'value' => 'print'),
-		)
-	),
-	'jsPlaceholder' => array(
-		'xtype' => 'textfield',
-		'value' => 'MinifyX.javascript',
-	),
-	'registerCss' => array(
-		'xtype' => 'list',
-		'value' => 'placeholder',
-		'options' => array(
-			array('name' => 'Placeholder', 'value' => 'placeholder'),
-			array('name' => 'Default', 'value' => 'default'),
-			array('name' => 'Print', 'value' => 'print'),
-		)
-	),
-	'cssPlaceholder' => array(
-		'xtype' => 'textfield',
-		'value' => 'MinifyX.css',
-	),
-    'jsGroups' => array(
+$tmp = [
+    'jsSources' => [
         'xtype' => 'textfield',
         'value' => '',
-    ),
-    'cssGroups' => array(
+    ],
+    'cssSources' => [
         'xtype' => 'textfield',
         'value' => '',
-    ),
-    'preHooks' => array(
+    ],
+
+    'minifyJs' => [
+        'xtype' => 'combo-boolean',
+        'value' => false,
+    ],
+    'minifyCss' => [
+        'xtype' => 'combo-boolean',
+        'value' => false,
+    ],
+
+    'jsFilename' => [
+        'xtype' => 'textfield',
+        'value' => 'scripts',
+    ],
+    'cssFilename' => [
+        'xtype' => 'textfield',
+        'value' => 'styles',
+    ],
+
+    'registerJs' => [
+        'xtype' => 'list',
+        'value' => 'placeholder',
+        'options' => [
+            ['name' => 'Placeholder', 'value' => 'placeholder'],
+            ['name' => 'Startup script', 'value' => 'startup'],
+            ['name' => 'Default', 'value' => 'default'],
+            ['name' => 'Print', 'value' => 'print'],
+        ],
+    ],
+    'jsPlaceholder' => [
+        'xtype' => 'textfield',
+        'value' => 'MinifyX.javascript',
+    ],
+    'registerCss' => [
+        'xtype' => 'list',
+        'value' => 'placeholder',
+        'options' => [
+            ['name' => 'Placeholder', 'value' => 'placeholder'],
+            ['name' => 'Default', 'value' => 'default'],
+            ['name' => 'Print', 'value' => 'print'],
+        ],
+    ],
+    'cssPlaceholder' => [
+        'xtype' => 'textfield',
+        'value' => 'MinifyX.css',
+    ],
+    'jsGroups' => [
         'xtype' => 'textfield',
         'value' => '',
-    ),
-    'hooks' => array(
+    ],
+    'cssGroups' => [
         'xtype' => 'textfield',
         'value' => '',
-    ),
-    'cssTpl' => array(
+    ],
+    'preHooks' => [
+        'xtype' => 'textfield',
+        'value' => '',
+    ],
+    'hooks' => [
+        'xtype' => 'textfield',
+        'value' => '',
+    ],
+    'cssTpl' => [
         'xtype' => 'textfield',
         'value' => '<link rel="stylesheet" href="[[+file]]" type="text/css" />',
-    ),
-    'jsTpl' => array(
+    ],
+    'jsTpl' => [
         'xtype' => 'textfield',
         'value' => '<script src="[[+file]]"></script>',
-    ),
-    'forceUpdate' => array(
+    ],
+    'forceUpdate' => [
         'xtype' => 'combo-boolean',
-        'value' => false
-    ),
-    'version' => array(
+        'value' => false,
+    ],
+    'version' => [
         'xtype' => 'textfield',
         'value' => '',
-    ),
-);
+    ],
+];
 
 foreach ($tmp as $k => $v) {
-	$properties[] = array_merge(
-		array(
-			'name' => $k,
-			'desc' => PKG_NAME_LOWER . '_prop_' . $k,
-			'lexicon' => PKG_NAME_LOWER . ':properties',
-		), $v
-	);
+    $properties[] = array_merge(
+        [
+            'name' => $k,
+            'desc' => PKG_NAME_LOWER . '_prop_' . $k,
+            'lexicon' => PKG_NAME_LOWER . ':properties',
+        ], $v
+    );
 }
 
 return $properties;

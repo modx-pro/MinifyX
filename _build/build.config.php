@@ -1,21 +1,19 @@
 <?php
 /* define package */
-define('PKG_NAME','MinifyX');
-define('PKG_NAME_LOWER',strtolower(PKG_NAME));
-define('PKG_VERSION','1.7.0');
-define('PKG_RELEASE','pl');
+define('PKG_NAME', 'MinifyX');
+define('PKG_NAME_LOWER', strtolower(PKG_NAME));
+define('PKG_VERSION', '1.7.0');
+define('PKG_RELEASE', 'pl');
 define('PKG_AUTO_INSTALL', false);
 define('PKG_PREPARE', false);
 
 /* define paths */
 if (isset($_SERVER['MODX_BASE_PATH'])) {
-	define('MODX_BASE_PATH', $_SERVER['MODX_BASE_PATH']);
-}
-elseif (file_exists(dirname(dirname(dirname(__FILE__))) . '/core')) {
-	define('MODX_BASE_PATH', dirname(dirname(dirname(__FILE__))) . '/');
-}
-else {
-	define('MODX_BASE_PATH', dirname(dirname(dirname(dirname(__FILE__)))) . '/');
+    define('MODX_BASE_PATH', $_SERVER['MODX_BASE_PATH']);
+} elseif (file_exists(dirname(dirname(dirname(__FILE__))) . '/core')) {
+    define('MODX_BASE_PATH', dirname(dirname(dirname(__FILE__))) . '/');
+} else {
+    define('MODX_BASE_PATH', dirname(dirname(dirname(dirname(__FILE__)))) . '/');
 }
 
 define('MODX_CORE_PATH', MODX_BASE_PATH . 'core/');
@@ -47,7 +45,7 @@ define('BUILD_PLUGIN_UPDATE', true);
 define('BUILD_SNIPPET_STATIC', false);
 define('BUILD_PLUGIN_STATIC', false);
 
-$BUILD_RESOLVERS = array(
-	'files',
-    'setup'
-);
+$BUILD_RESOLVERS = [
+    'files',
+    'setup',
+];

@@ -58,7 +58,7 @@ class MinifyX {
             'jsTpl' => '<script src="[[+file]]"></script>',
             'cssTpl' => '<link rel="stylesheet" href="[[+file]]" type="text/css">',
             'version' => '',
-        ),$config);
+        ), $config);
         $this->config['jsExt'] = $this->config['minifyJs'] ? '.min.js' : '.js';
         $this->config['cssExt'] = $this->config['minifyCss'] ? '.min.css' : '.css';
         if (empty($this->config['cacheFolder'])) {
@@ -657,17 +657,14 @@ class MinifyX {
                         break;
                     case 'print':
                         return $tag;
+                    case 'startup':
+                        if ($type == 'js') $this->modx->regClientStartupScript($tag);
+                        break;
                     default:
                         if ($type == 'css') {
                             $this->modx->regClientCSS($tag);
-                        }
-                        else {
-                            if ($register == 'startup') {
-                                $this->modx->regClientStartupScript($tag);
-                            }
-                            else {
-                                $this->modx->regClientScript($tag);
-                            }
+                        } else {
+                            $this->modx->regClientScript($tag);
                         }
                 }
             }

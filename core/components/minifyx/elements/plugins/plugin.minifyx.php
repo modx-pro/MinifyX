@@ -242,8 +242,22 @@ switch ($modx->event->name) {
 		// Minify the page content
         if ($modx->getOption('minifyx_minifyHtml', null, false)) {
             $output = $modx->resource->_output;
-            $output = preg_replace('/<!--.*-->/', '', $output);
-            $output = preg_replace('/\s+/', ' ', $output);
+            $replace = [
+                '/<!--[^\[](.*?)[^\]]-->/s' => '',
+                "/<\?php/"                  => '<?php ',
+                "/\n([\S])/"                => ' $1',
+                "/\n([\S])/"                => '$1',
+                "/>\n</"                    => '><',
+                "/>\s+\n</"                 => '><',
+                "/>\n\s+</"                 => '><',
+                "/\r/"                      => '',
+                "/\n/"                      => '',
+                "/\t/"                      => ' ',
+                '/ +/'                      => ' ',
+                "/\t/"                      => '',
+                "/ +/"                      => ' ',
+            ];
+            $output = preg_replace(array_keys($replace), array_values($replace), $output);
             $modx->resource->_output = $output;
         }
 
