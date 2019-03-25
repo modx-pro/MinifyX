@@ -1,5 +1,8 @@
 Changelog for MinifyX
 
+1.7.1-pl (25.03.2019)
+- Fixed bug with startup js register.
+
 1.7.0-pl (30.12.2018)
 ==============
 - Added php function "minify" to manage assets from the php code.
