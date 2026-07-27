@@ -1,24 +1,28 @@
 <?php
 
-$root = dirname(dirname(__FILE__)) . '/';
-require_once $root . '_build/includes/functions.php';
-$base = $root . 'core/components/minifyx/munee/';
+$root = dirname(__DIR__) . '/';
+$component = $root . 'core/components/minifyx/';
 
-// Clean base dir
-if ($dirs = @scandir($base)) {
-	foreach ($dirs as $dir) {
-		if (!in_array($dir, array('src', 'config', 'vendor', '.', '..'))) {
-			$path = $base . $dir;
-			if (is_dir($path)) {
-				removeDir($path);
-			}
-			else {
-				unlink($path);
-			}
-		}
-	}
+// Remove legacy Munee submodule leftovers from the package tree.
+$legacyMunee = $component . 'munee/';
+if (is_dir($legacyMunee)) {
+    $iterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($legacyMunee, FilesystemIterator::SKIP_DOTS),
+        RecursiveIteratorIterator::CHILD_FIRST
+    );
+    foreach ($iterator as $file) {
+        $file->isDir() ? @rmdir($file->getPathname()) : @unlink($file->getPathname());
+    }
+    @rmdir($legacyMunee);
 }
 
-// Clean vendors
-$base = $root . 'core/components/minifyx/vendor/';
-cleanPackages($base);
+$vendorAutoload = $component . 'vendor/autoload.php';
+if (!is_file($vendorAutoload)) {
+    fwrite(
+        STDERR,
+        "MinifyX prepare: vendor/autoload.php is missing.\n"
+        . "Run: composer install --no-dev --optimize-autoloader\n"
+        . "inside core/components/minifyx/ before building the transport package.\n"
+    );
+    exit(1);
+}

@@ -1,8 +1,14 @@
 --------------------
 MinifyX
 --------------------
+Version: 2.0.0-pl
+--------------------
 
-MinifyX is a MODX® Revolution addon that allows you to combine and minify JS and CSS files to speed up your site and reduce server load.
+MinifyX is a MODX® Revolution addon that combines, compiles and minifies JS and CSS files, with optional image transforms and HTML minify.
 
-Feel free to suggest ideas/improvements/bugs on GitHub:
-http://github.com/sergant210/MinifyX/issues
+Requirements: PHP 8.2+, MODX 2.8 or 3.x.
+
+Migration notes: core/components/minifyx/docs/migration-2.0.md
+
+Issues:
+https://github.com/modx-pro/MinifyX/issues

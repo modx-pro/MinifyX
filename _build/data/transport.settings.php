@@ -66,6 +66,22 @@ $tmp = [
         'xtype' => 'combo-boolean',
         'value' => false,
     ],
+    'connector' => [
+        'xtype' => 'textfield',
+        'value' => '/assets/components/minifyx/munee.php',
+    ],
+    'image_signing_key' => [
+        'xtype' => 'textfield',
+        'value' => '',
+    ],
+    'image_max_pixels' => [
+        'xtype' => 'numberfield',
+        'value' => 20000000,
+    ],
+    'image_max_bytes' => [
+        'xtype' => 'numberfield',
+        'value' => 20000000,
+    ],
 ];
 
 foreach ($tmp as $k => $v) {

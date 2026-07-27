@@ -1,127 +1,231 @@
-Changelog for MinifyX
+# Changelog
 
-1.7.1-pl (25.03.2019)
-- Fixed bug with startup js register.
+All notable changes to this project will be documented in this file.
 
-1.7.0-pl (30.12.2018)
-==============
-- Added php function "minify" to manage assets from the php code.
-- Added the ability to minify content.
-- Added the ability to use version for assets.
-- Updated composer dependencies.
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-1.6.0-pl (22.01.2018)
-==============
-- Updated all Munee dependencies. You can do it anytime via composer.
-- Php version must be >= 5.6.
-- Added the method "getFileUrl" to the MinifyX class.
-- Added the method "getFilePath" to the MinifyX class.
-- Added the "forceUpdate" snippet parameters and the same system setting.
-- Added the "forceDelete" system setting to delete all files in the cache directory.
-- Added the "cssTpl" and "jsTpl" snippet parameters.
-- Added new register type "print" for immediate output.
-- Added the file hook "fixVm.php" which fixes the "vmax" and "vmin" units after css compilation.
-- Some bugfixes.
+## [2.0.0-pl] - 2026-07-27
 
+### Added
+- Pure-PHP asset pipeline with PSR-4 namespace `MinifyX\`.
+- Atomic filesystem cache with source fingerprinting and warm-cache short-circuit.
+- Modern processors for CSS/JS minify, SCSS, LESS, and image transforms.
+- Safe HTML minifier that preserves `pre`, `textarea`, `script`, `style`, and conditional comments.
+- Registered-assets parser that keeps tag attributes (`defer`, `async`, `type="module"`, `integrity`, `media`, …).
+- Image endpoint hardening: path whitelist (directory-boundary), pixel/byte/dimension limits, ETag/`304`, HMAC signing enforced when key is set.
+- Characterization, security, and processor PHPUnit suite plus PHPStan level 8 and GitHub Actions CI.
+- System settings `minifyx_connector`, `minifyx_image_signing_key`, `minifyx_image_max_pixels`, `minifyx_image_max_bytes`.
 
-1.5.0-pl (19.01.2018)
-==============
-- Added config file for groups (core/components/minifyx/config/groups.php).
-- Added the "cssGroup" snippet parameter.
-- Added the "jsGroup" snippet parameter.
-- Added the "preHooks" snippet parameter. A hook can be either a snippet or a file, specified in the core/components/minifyx/hooks folder.
-- Added the "hooks" snippet parameter. A hook can be either a snippet or a file, specified in the core/components/minifyx/hooks folder.
-- Added the ability to run the snippet multiple times.
-- Added file hook "cssToPage.php" (&hooks=`cssToPage.php`).
+### Changed
+- Minimum PHP version raised to 8.2.
+- Compatible with MODX 2.8 and MODX 3.x through a legacy `modX` adapter.
+- Snippet, `minify()`, groups, hooks, and connector URL keep the 1.x public contract in compatibility mode.
+- Cache keys now include source mtimes and post-hook content.
+- Snippet and plugin share `processFiles()` / `processAndSave()` (same cache, hooks, and write gates).
+- Bundled registered assets keep attributes from the first tag only and drop `integrity`/`crossorigin`.
 
-1.4.4-pl (16.05.2016)
-==============
-- [#22] Updated sabberworm/php-css-parser to version 7.0.3.
+### Removed
+- Dependency on Munee and its abandoned transitive packages (`jshrink`, `leafo/scssphp`, `oyejorge/less.php`, `imagine` 0.7, CoffeeScript packager).
+- Git submodule `core/components/minifyx/munee`.
 
-1.4.3-pl (28.04.2016)
-==============
-- [#21] Updated sabberworm/php-css-parser to version 7.0.2.
+### Deprecated
+- Runtime CoffeeScript compilation is isolated behind `LegacyCoffeeCompiler` and will be removed in 3.0. Prefers precompiled `.js`.
 
-1.4.2-pl (22.08.2015)
-==============
-- Updated Munee with all subpackages.
-- Fixed fatal error on PHP 5.3.3.
+### Dependencies
+- `matthiasmullie/minify` ^1.3.75
+- `scssphp/scssphp` ^2.0
+- `wikimedia/less.php` ^5.0
+- `intervention/image` ^3.11
 
-1.4.1-pl (01.06.2015)
-==============
-- Updated Munee with all subpackages.
-- [#18] Improved work of plugin.
+### Fixed
+- Sibling-prefix path bypass in PathGuard/FileNormalizer (`/web` vs `/web-backup`).
+- Cache filename path traversal via `jsFilename`/`cssFilename`.
+- Empty or failed compiles no longer publish cache files.
+- Post-hooks sync content on the processAndSave host before write.
+- SCSS/LESS query-string variables reach compilers.
+- Image resize requests above max dimension rejected; HMAC is a real gate when key is configured.
+- `reset()` / `minify()` now sync `.min.js` / `.min.css` extensions.
+- `prepareFiles()` no longer mutates `$_GET`.
+- `print` registration returns both CSS and JS tags.
+- Empty cache writes are no longer treated as failures.
+- Plugin uses `$modx` instead of invalid `$this->modx` for cache errors.
+- Image rewrite is a single pass over HTML instead of repeated full-document `str_replace`.
 
-1.3.1-pl (21.07.2014)
-==============
-- [#12] Support of MODX 2.3
-- [#11] Improved set of "munee_cache" variable on Windows.
+## [1.7.1-pl] - 2019-03-25
 
-1.3.0-pl1 (12.05.2014)
-==============
-- [#8] Fixed determining of cache dir for advanced site configuration.
-- [#7] Fixed clearing cache.
-- [#2] Added cut of comments in raw styles and scripts.
-- [#9] Changed lessphp to https://github.com/oyejorge/less.php.
-- Updated scssphp to version 0.0.10.
+### Fixed
+- Startup JavaScript registration.
 
-1.3.0-beta (26.12.2013)
-==============
-- Refactored main class.
-- Rewrited snippet MinifyX.
-- Added plugin MinifyX that can process scripts, styles and images of web page.
-- Improved connector in assets for image processing.
-- Changed cached files format.
+## [1.7.0-pl] - 2018-12-30
 
-1.2.2-pl3 (16.12.2013)
-==============
-- Removed phar file.
-- Fixed url of cache dir in subfolder installations.
-- Ability of commenting files by prefixing them by the dash.
+### Added
+- PHP function `minify()` for managing assets from PHP code.
+- Content minification.
+- Asset versioning.
 
-1.2.1-pl (03.12.2013)
-==============
-- [#1] Replaced constant DIRECTORY_SEPARATOR to '/'.
+### Dependencies
+- Updated Composer dependencies.
 
-1.2.0-pl (23.11.2013)
-==============
-- Fixed clean of parameter &cacheFolder
+## [1.6.0-pl] - 2018-01-22
 
-1.2.0-rc (20.11.2013)
-==============
-- Updated leafo/lessphp to v0.4.0
-- Updated leafo/scssphp to v0.0.8
-- Improved error logging
+### Added
+- `MinifyX::getFileUrl()` method.
+- `MinifyX::getFilePath()` method.
+- `forceUpdate` snippet parameter and system setting.
+- `forceDelete` system setting for deleting all files from the cache directory.
+- `cssTpl` and `jsTpl` snippet parameters.
+- `print` registration type for immediate output.
+- `fixVm.php` file hook for fixing `vmax` and `vmin` units after CSS compilation.
 
-1.2.0-beta (12.11.2013)
-==============
-- Integrated Munee library from http://mun.ee
-- Auto creation of cache dir.
-- More options to register files on frontend.
+### Changed
+- Minimum PHP version raised to 5.6.
 
-1.1.3 (07.01.2013)
-==============
-- absolute path in the URL attribute of all compressed files.
+### Fixed
+- Various minor issues.
 
-1.1.2 (11.09.2012)
-==============
+### Dependencies
+- Updated Munee and its dependencies.
+
+## [1.5.0-pl] - 2018-01-19
+
+### Added
+- Group configuration file at `core/components/minifyx/config/groups.php`.
+- `cssGroup` and `jsGroup` snippet parameters.
+- `preHooks` and `hooks` snippet parameters. A hook can be a snippet or a file in `core/components/minifyx/hooks`.
+- Support for running the snippet multiple times.
+- `cssToPage.php` file hook, available through `&hooks=cssToPage.php`.
+
+## [1.4.4-pl] - 2016-05-16
+
+### Dependencies
+- [#22] Updated `sabberworm/php-css-parser` to 7.0.3.
+
+## [1.4.3-pl] - 2016-04-28
+
+### Dependencies
+- [#21] Updated `sabberworm/php-css-parser` to 7.0.2.
+
+## [1.4.2-pl] - 2015-08-22
+
+### Fixed
+- Fatal error on PHP 5.3.3.
+
+### Dependencies
+- Updated Munee and all its subpackages.
+
+## [1.4.1-pl] - 2015-06-01
+
+### Changed
+- [#18] Improved plugin processing.
+
+### Dependencies
+- Updated Munee and all its subpackages.
+
+## [1.3.1-pl] - 2014-07-21
+
+### Added
+- [#12] MODX 2.3 support.
+
+### Fixed
+- [#11] Configuration of the `munee_cache` variable on Windows.
+
+## [1.3.0-pl1] - 2014-05-12
+
+### Added
+- [#2] Removal of comments from raw styles and scripts.
+
+### Fixed
+- [#8] Cache directory detection for advanced site configurations.
+- [#7] Cache clearing.
+
+### Dependencies
+- [#9] Replaced `lessphp` with [oyejorge/less.php](https://github.com/oyejorge/less.php).
+- Updated `scssphp` to 0.0.10.
+
+## [1.3.0-beta] - 2013-12-26
+
+### Added
+- MinifyX plugin for processing scripts, styles, and images on web pages.
+
+### Changed
+- Rewrote the MinifyX snippet.
+- Improved the asset connector for image processing.
+- Changed the cached-file format.
+
+### Refactored
+- Refactored the main class.
+
+## [1.2.2-pl3] - 2013-12-16
+
+### Added
+- Support for excluding files by prefixing them with a dash.
+
+### Fixed
+- Cache directory URL in subdirectory installations.
+
+### Removed
+- PHAR file.
+
+## [1.2.1-pl] - 2013-12-03
+
+### Changed
+- [#1] Replaced `DIRECTORY_SEPARATOR` with `/`.
+
+## [1.2.0-pl] - 2013-11-23
+
+### Fixed
+- Clearing of the `cacheFolder` parameter.
+
+## [1.2.0-rc] - 2013-11-20
+
+### Changed
+- Improved error logging.
+
+### Dependencies
+- Updated `leafo/lessphp` to 0.4.0.
+- Updated `leafo/scssphp` to 0.0.8.
+
+## [1.2.0-beta] - 2013-11-12
+
+### Added
+- Munee integration.
+- Automatic cache directory creation.
+- Additional options for registering frontend files.
+
+## [1.1.3] - 2013-01-07
+
+### Changed
+- Compressed file URLs now use absolute paths.
+
+## [1.1.2] - 2012-09-11
+
+### Changed
 - Improved caching of minified files.
 
-1.1.1 (10.09.2012)
-==============
-- Removed E_WARNING on line 94 of minifyx.class.php
+## [1.1.1] - 2012-09-10
 
-1.1.0 (09.09.2012)
-==============
-- Changed css minifier to Minify_CSS_Compressor from https://code.google.com/p/minify/
-- Added Douglas Crockford's JSMin https://github.com/rgrove/jsmin-php/
-- Serious refactor of code
-- Added properties to snippet
-- Removed plugin
-- Improved caching of files
-- Added parameters jsFilename && cssFilename
+### Fixed
+- `E_WARNING` on line 94 of `minifyx.class.php`.
 
+## [1.1.0] - 2012-09-09
 
-1.0.0
-==============
-- Initial Version
+### Added
+- Douglas Crockford's [JSMin](https://github.com/rgrove/jsmin-php).
+- Snippet properties.
+- `jsFilename` and `cssFilename` parameters.
+
+### Changed
+- CSS minifier changed to `Minify_CSS_Compressor`.
+- Improved file caching.
+
+### Refactored
+- Refactored the codebase.
+
+### Removed
+- Plugin.
+
+## [1.0.0]
+
+### Added
+- Initial release.
