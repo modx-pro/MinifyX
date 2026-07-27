@@ -6,8 +6,8 @@ Version **2.0** replaces Munee with a pure-PHP pipeline. Snippet parameters, `mi
 
 ## Requirements
 
-- PHP 8.2+
-- MODX Revolution 2.8 or 3.x
+- MODX Revolution **2.8.x+**: PHP **7.4+**
+- MODX Revolution **3.x**: PHP **8.2+**
 - `vendor/` from Composer (included in the transport package)
 - GD or Imagick if you enable image processing
 

@@ -18,8 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - System settings `minifyx_connector`, `minifyx_image_signing_key`, `minifyx_image_max_pixels`, `minifyx_image_max_bytes`.
 
 ### Changed
-- Minimum PHP version raised to 8.2.
-- Compatible with MODX 2.8 and MODX 3.x through a legacy `modX` adapter.
+- Platform requirements: MODX 2.8.x+ on PHP 7.4+; MODX 3.x on PHP 8.2+.
+- Compatible with MODX 2.8+ and MODX 3.x through a legacy `modX` adapter.
 - Snippet, `minify()`, groups, hooks, and connector URL keep the 1.x public contract in compatibility mode.
 - Cache keys now include source mtimes and post-hook content.
 - Snippet and plugin share `processFiles()` / `processAndSave()` (same cache, hooks, and write gates).

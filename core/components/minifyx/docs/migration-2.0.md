@@ -2,7 +2,8 @@
 
 ## Breaking requirements
 
-- PHP 8.2 or newer
+- MODX Revolution **2.8.x+** with PHP **7.4+**
+- MODX Revolution **3.x** with PHP **8.2+**
 - Munee is removed. Transport packages must include `vendor/` built with Composer.
 
 ## What stays the same

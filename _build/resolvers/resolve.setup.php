@@ -14,6 +14,26 @@ if ($object->xpdo) {
 	switch ($options[xPDOTransport::PACKAGE_ACTION]) {
 		case xPDOTransport::ACTION_INSTALL:
 		case xPDOTransport::ACTION_UPGRADE:
+            $modxMajor = 2;
+            if (defined('MODX_VERSION')) {
+                $modxMajor = (int) explode('.', MODX_VERSION)[0];
+            } elseif (class_exists('MODX\Revolution\modX')) {
+                $modxMajor = 3;
+            }
+            $phpMin = $modxMajor >= 3 ? '8.2.0' : '7.4.0';
+            if (version_compare(PHP_VERSION, $phpMin, '<')) {
+                $modx->log(
+                    modX::LOG_LEVEL_ERROR,
+                    sprintf(
+                        '[MinifyX] MODX %d requires PHP %s+. Current PHP: %s',
+                        $modxMajor,
+                        $phpMin,
+                        PHP_VERSION
+                    )
+                );
+                return false;
+            }
+
             $file = MODX_CORE_PATH . 'components/minifyx/config/groups.php';
             if (!file_exists($file)) {
                 if (!file_exists(MODX_CORE_PATH . 'components/minifyx/config')) {
