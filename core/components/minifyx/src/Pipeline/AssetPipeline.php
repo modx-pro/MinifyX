@@ -139,7 +139,10 @@ final class AssetPipeline
 
         $minify = $forceMinify || (bool) $this->config->get('minify' . ucfirst($type), false);
         $mangleJs = $type === 'js' && !empty($this->config->get('mangleJs', false));
-        $basename = PathHelper::sanitizeFilename((string) $this->config->get($type . 'Filename', $type === 'css' ? 'styles' : 'scripts'));
+        $defaultFilename = $type === 'css' ? 'styles' : 'scripts';
+        $basename = PathHelper::sanitizeFilename(
+            (string) $this->config->get($type . 'Filename', $defaultFilename)
+        );
         $extension = (string) $this->config->get($type . 'Ext', $type === 'css' ? '.css' : '.js');
         $jsMangler = (string) $this->config->get('jsMangler', 'terser');
         $jsManglerPath = (string) $this->config->get('jsManglerPath', '');

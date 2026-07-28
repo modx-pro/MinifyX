@@ -15,8 +15,13 @@ final class EsbuildJsOptimizer implements JsOptimizerInterface
         $this->runner = $runner ?? new ExternalProcessRunner();
     }
 
-    public function optimize(string $combined, bool $minify, bool $mangle, string $jsMangler, string $jsManglerPath): string
-    {
+    public function optimize(
+        string $combined,
+        bool $minify,
+        bool $mangle,
+        string $jsMangler,
+        string $jsManglerPath
+    ): string {
         $binary = $this->resolveBinary($jsMangler, $jsManglerPath);
         if ($binary === null) {
             throw new JsManglerUnavailableException('esbuild binary is not available.');

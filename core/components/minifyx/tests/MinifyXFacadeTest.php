@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace MinifyX\Tests;
 
-use PHPUnit\Framework\TestCase;
+use MinifyX\Model\MinifyX;
 
 final class MinifyXFacadeTest extends TestCase
 {
@@ -34,7 +34,7 @@ final class MinifyXFacadeTest extends TestCase
     public function testMinifySyncsExtensionsAndPrintReturnsBothTypes(): void
     {
         $modx = new FakeModx('web');
-        $mx = new \MinifyX($modx, [
+        $mx = new MinifyX($modx, [
             'cacheFolder' => '/assets/components/minifyx/cache/',
             'jsSources' => 'assets/js/one.js,assets/js/two.js',
             'cssSources' => 'assets/css/one.css',
@@ -60,12 +60,12 @@ final class MinifyXFacadeTest extends TestCase
             'registerJs' => 'default',
             'forceUpdate' => true,
         ];
-        $mx = new \MinifyX($modx, $config);
+        $mx = new MinifyX($modx, $config);
         $mx->run();
         $firstCalls = $mx->getPipeline()->getCompilerCalls();
         self::assertGreaterThan(0, $firstCalls);
 
-        $mx2 = new \MinifyX($modx, array_merge($config, ['forceUpdate' => false]));
+        $mx2 = new MinifyX($modx, array_merge($config, ['forceUpdate' => false]));
         $mx2->run();
         self::assertSame(0, $mx2->getPipeline()->getCompilerCalls());
     }
@@ -73,7 +73,7 @@ final class MinifyXFacadeTest extends TestCase
     public function testEmptySaveFileIsNotTreatedAsFailure(): void
     {
         $modx = new FakeModx('web');
-        $mx = new \MinifyX($modx, [
+        $mx = new MinifyX($modx, [
             'cacheFolder' => '/assets/components/minifyx/cache/',
             'jsFilename' => 'empty',
             'forceUpdate' => true,
@@ -90,7 +90,7 @@ final class MinifyXFacadeTest extends TestCase
     {
         $_GET = ['original' => 'yes'];
         $modx = new FakeModx('web');
-        $mx = new \MinifyX($modx, ['cacheFolder' => '/assets/components/minifyx/cache/']);
+        $mx = new MinifyX($modx, ['cacheFolder' => '/assets/components/minifyx/cache/']);
         $params = [];
         $mx->prepareFiles('assets/js/one.js?x=1', 'js', $params);
         self::assertSame(['x' => '1'], $params);

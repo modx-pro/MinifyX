@@ -1,11 +1,16 @@
 <?php
 
+namespace MinifyX\Model;
+
+use InvalidArgumentException;
 use MinifyX\Html\AssetTag;
 use MinifyX\Html\AssetTagRenderer;
 use MinifyX\Pipeline\AssetPipeline;
 use MinifyX\ServiceFactory;
 use MinifyX\Contract\HookHostInterface;
 use MinifyX\Support\PathHelper;
+use RuntimeException;
+use Throwable;
 
 /**
  * Compatibility facade for MODX getService() / snippet / minify() API.
@@ -26,9 +31,9 @@ class MinifyX implements HookHostInterface
     /** @var array{js?: list<string>, css?: list<string>} */
     protected $sources = [];
 
-    protected string $_content = '';
-    protected string $_filename = '';
-    protected string $_filetype = '';
+    protected string $content = '';
+    protected string $filename = '';
+    protected string $filetype = '';
 
     /** @var list<string> */
     protected array $cachedFiles = [];
@@ -60,7 +65,8 @@ class MinifyX implements HookHostInterface
         if ($this->prepareCacheFolder()) {
             $this->cachedFiles = $this->pipeline->getTrackedFiles();
         } else {
-            $this->logError('[MinifyX] Could not create cache dir "' . ($this->config['cacheFolderPath'] ?? '') . '"');
+            $cacheDir = (string) ($this->config['cacheFolderPath'] ?? '');
+            $this->logError('[MinifyX] Could not create cache dir "' . $cacheDir . '"');
         }
     }
 
@@ -74,14 +80,16 @@ class MinifyX implements HookHostInterface
 
     public function reset(array $config = []): void
     {
-        $this->_filename = '';
-        $this->_content = '';
+        $this->filename = '';
+        $this->content = '';
         foreach ($this->parameters as $source) {
             $this->config[$source] = '';
         }
         $this->setConfig($config);
         $this->processParams();
-        $this->config['jsExt'] = !empty($this->config['minifyJs']) || !empty($this->config['mangleJs']) ? '.min.js' : '.js';
+        $this->config['jsExt'] = !empty($this->config['minifyJs']) || !empty($this->config['mangleJs'])
+            ? '.min.js'
+            : '.js';
         $this->config['cssExt'] = !empty($this->config['minifyCss']) ? '.min.css' : '.css';
         $this->syncPipelineConfig();
     }
@@ -89,7 +97,12 @@ class MinifyX implements HookHostInterface
     public function setConfig(array $config = []): void
     {
         $this->config = array_merge($this->config, $config);
-        if (isset($config['minifyJs']) || isset($config['minifyCss']) || isset($config['jsExt']) || isset($config['cssExt'])) {
+        if (
+            isset($config['minifyJs'])
+            || isset($config['minifyCss'])
+            || isset($config['jsExt'])
+            || isset($config['cssExt'])
+        ) {
             $this->config['jsExt'] = !empty($this->config['minifyJs']) ? '.min.js' : '.js';
             $this->config['cssExt'] = !empty($this->config['minifyCss']) ? '.min.css' : '.css';
         }
@@ -248,7 +261,7 @@ class MinifyX implements HookHostInterface
      */
     public function prepareFiles($files, $type = '', ?array &$queryParams = null): string
     {
-        $this->_filetype = (string) $type;
+        $this->filetype = (string) $type;
         $normalized = $this->pipeline()->getNormalizer()->normalize($files);
         $queryParams = $normalized['queryParams'];
 
@@ -269,8 +282,8 @@ class MinifyX implements HookHostInterface
             return '';
         }
 
-        $type = $this->_filetype !== '' ? $this->_filetype : $this->detectType($paths);
-        $this->_filetype = $type;
+        $type = $this->filetype !== '' ? $this->filetype : $this->detectType($paths);
+        $this->filetype = $type;
         $minify = isset($options['minify'])
             ? filter_var($options['minify'], FILTER_VALIDATE_BOOLEAN)
             : (bool) ($this->config['minify' . ucfirst($type)] ?? false);
@@ -319,10 +332,10 @@ class MinifyX implements HookHostInterface
     public function processFiles($files, string $type): ?array
     {
         $this->syncPipelineConfig();
-        $this->_filetype = $type;
+        $this->filetype = $type;
         $result = $this->pipeline()->processAndSave($files, $type, $this);
-        $this->_filename = $result['filename'];
-        $this->_content = $result['content'];
+        $this->filename = $result['filename'];
+        $this->content = $result['content'];
         if (!$result['success']) {
             if ($result['error'] !== '') {
                 $this->logError('[MinifyX] ' . $result['error']);
@@ -387,7 +400,7 @@ class MinifyX implements HookHostInterface
     {
         // Empty string after a processor failure must not be published.
         // Explicit empty content is allowed only when caller passes a successful compile.
-        $type = $this->_filetype ?: 'js';
+        $type = $this->filetype ?: 'js';
         try {
             $filename = PathHelper::sanitizeFilename((string) ($this->config[$type . 'Filename'] ?? $type));
         } catch (InvalidArgumentException $e) {
@@ -397,11 +410,11 @@ class MinifyX implements HookHostInterface
         }
 
         if (pathinfo($filename, PATHINFO_EXTENSION) === $type) {
-            $this->_filename = $filename;
+            $this->filename = $filename;
         } else {
             $extension = (string) ($this->config[$type . 'Ext'] ?? ('.' . $type));
             $hash = substr(sha1((string) $data), 0, (int) ($this->config['hash_length'] ?? 10));
-            $this->_filename = $filename . '_' . $hash . $extension;
+            $this->filename = $filename . '_' . $hash . $extension;
         }
 
         $this->setContent((string) $data);
@@ -419,12 +432,12 @@ class MinifyX implements HookHostInterface
             }
         }
 
-        if ($this->_filename === '') {
+        if ($this->filename === '') {
             return false;
         }
 
         try {
-            $this->_filename = PathHelper::sanitizeFilename($this->_filename);
+            $this->filename = PathHelper::sanitizeFilename($this->filename);
         } catch (InvalidArgumentException $e) {
             $this->logError('[MinifyX] ' . $e->getMessage());
 
@@ -432,14 +445,15 @@ class MinifyX implements HookHostInterface
         }
 
         $force = (bool) ($this->config['forceUpdate'] ?? false);
-        $written = $this->pipeline()->getCache()->write($this->_filename, $this->getContent(), $force);
+        $written = $this->pipeline()->getCache()->write($this->filename, $this->getContent(), $force);
         if (!$written) {
-            $this->logError('[MinifyX] Could not save cache file ' . ($this->config['cacheFolderPath'] ?? '') . $this->_filename);
+            $cacheDir = (string) ($this->config['cacheFolderPath'] ?? '');
+            $this->logError('[MinifyX] Could not save cache file ' . $cacheDir . $this->filename);
 
             return false;
         }
-        if (!in_array($this->_filename, $this->cachedFiles, true)) {
-            $this->cachedFiles[] = $this->_filename;
+        if (!in_array($this->filename, $this->cachedFiles, true)) {
+            $this->cachedFiles[] = $this->filename;
         }
 
         return is_file($this->getFilePath());
@@ -447,36 +461,36 @@ class MinifyX implements HookHostInterface
 
     public function getFilename(): string
     {
-        return $this->_filename;
+        return $this->filename;
     }
 
     public function setFilename(string $name): void
     {
-        $this->_filename = $name;
+        $this->filename = $name;
     }
 
     public function isJs(?string $file = null): bool
     {
-        $file = $file ?? $this->_filename;
+        $file = $file ?? $this->filename;
 
         return $file !== '' ? pathinfo($file, PATHINFO_EXTENSION) === 'js' : false;
     }
 
     public function isCss(?string $file = null): bool
     {
-        $file = $file ?? $this->_filename;
+        $file = $file ?? $this->filename;
 
         return $file !== '' ? pathinfo($file, PATHINFO_EXTENSION) === 'css' : false;
     }
 
     public function getContent(): string
     {
-        return $this->_content;
+        return $this->content;
     }
 
     public function setContent(string $content): void
     {
-        $this->_content = $content;
+        $this->content = $content;
     }
 
     public function getFileUrl($file = null)
@@ -568,25 +582,29 @@ class MinifyX implements HookHostInterface
                 : '';
 
             $result = $this->pipeline()->processAndSave($value, $type, $this);
-            $this->_filename = $result['filename'];
-            $this->_content = $result['content'];
-            $this->_filetype = $type;
+            $this->filename = $result['filename'];
+            $this->content = $result['content'];
+            $this->filetype = $type;
 
             if (!$result['success']) {
                 if ($result['error'] !== '') {
                     $this->logError('[MinifyX] ' . $result['error']);
                 }
+
                 continue;
             }
 
-            if ($result['filename'] === '' || ($this->modx->context->key ?? '') === 'mgr') {
-                if (($this->modx->context->key ?? '') === 'mgr' && $result['filename'] !== '') {
+            $contextKey = (string) ($this->modx->context->key ?? '');
+            if ($result['filename'] === '' || $contextKey === 'mgr') {
+                if ($contextKey === 'mgr' && $result['filename'] !== '') {
                     $output[] = $this->getFileUrl();
                 }
+
                 continue;
             }
 
-            $link = $result['url'] . (!empty($this->config['version']) ? $this->getVersion() : '');
+            $versionSuffix = !empty($this->config['version']) ? $this->getVersion() : '';
+            $link = $result['url'] . $versionSuffix;
             $assetTag = new AssetTag(
                 $type === 'css' ? AssetTag::KIND_LINK : AssetTag::KIND_SCRIPT,
                 $link
@@ -716,4 +734,8 @@ class MinifyX implements HookHostInterface
             $this->modx->log($level, $message);
         }
     }
+}
+
+if (!class_exists('MinifyX', false)) {
+    class_alias(MinifyX::class, 'MinifyX');
 }

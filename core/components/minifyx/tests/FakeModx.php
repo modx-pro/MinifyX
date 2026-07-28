@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace MinifyX\Tests;
 
+use MinifyX\Model\MinifyX;
+
 final class FakeModx
 {
     public object $context;
@@ -33,6 +35,11 @@ final class FakeModx
         ];
     }
 
+    /**
+     * @param mixed $options
+     * @param mixed $default
+     * @return mixed
+     */
     public function getOption(string $key, $options = null, $default = null, bool $skipEmpty = false)
     {
         if (is_array($options) && array_key_exists($key, $options)) {
@@ -50,8 +57,26 @@ final class FakeModx
     public function getParser(): object
     {
         return new class {
-            public function processElementTags($a, &$content, $b = false, $c = false, $d = '[[', $e = ']]', $f = [], $g = 1): void
-            {
+            /**
+             * @param mixed $a
+             * @param mixed $content
+             * @param mixed $b
+             * @param mixed $c
+             * @param mixed $d
+             * @param mixed $e
+             * @param mixed $f
+             * @param mixed $g
+             */
+            public function processElementTags(
+                $a,
+                &$content,
+                $b = false,
+                $c = false,
+                $d = '[[',
+                $e = ']]',
+                $f = [],
+                $g = 1
+            ): void {
                 // no-op for tests
             }
         };
@@ -77,15 +102,22 @@ final class FakeModx
         $this->startup[] = $tag;
     }
 
+    /**
+     * @param array<string, mixed> $properties
+     * @return mixed
+     */
     public function runSnippet(string $name, array $properties = [])
     {
         return null;
     }
 
+    /**
+     * @param array<string, mixed> $config
+     */
     public function getService(string $name, string $class, string $path, array $config = []): object
     {
         require_once dirname(__DIR__) . '/model/minifyx/minifyx.class.php';
 
-        return new \MinifyX($this, $config);
+        return new MinifyX($this, $config);
     }
 }

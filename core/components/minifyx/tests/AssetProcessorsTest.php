@@ -9,7 +9,6 @@ use MinifyX\Processor\CssJsProcessor;
 use MinifyX\Processor\LegacyCoffeeCompiler;
 use MinifyX\Processor\LessCompiler;
 use MinifyX\Processor\ScssCompiler;
-use PHPUnit\Framework\TestCase;
 
 final class AssetProcessorsTest extends TestCase
 {

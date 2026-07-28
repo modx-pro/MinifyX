@@ -69,7 +69,11 @@ final class ImageController
             return $this->error(422, $e->getMessage());
         }
 
-        $fingerprint = substr(hash('sha1', $absolute . '|' . serialize($options) . '|' . (string) filemtime($absolute)), 0, 16);
+        $fingerprint = substr(
+            hash('sha1', $absolute . '|' . serialize($options) . '|' . (string) filemtime($absolute)),
+            0,
+            16
+        );
         $ext = pathinfo($absolute, PATHINFO_EXTENSION) ?: 'img';
         $cacheName = 'img_' . $fingerprint . '.' . $ext;
 

@@ -33,8 +33,14 @@ final class AssetTagRenderer
         return '<script' . $this->stringifyAttributes($attributes) . '></script>';
     }
 
-    public function renderPreload(string $assetType, string $url, AssetTag $tag, bool $enabled, string $cssPreloadTpl = '', string $jsPreloadTpl = ''): ?string
-    {
+    public function renderPreload(
+        string $assetType,
+        string $url,
+        AssetTag $tag,
+        bool $enabled,
+        string $cssPreloadTpl = '',
+        string $jsPreloadTpl = ''
+    ): ?string {
         if ($assetType === 'css') {
             if (!$this->preloadPolicy->shouldPreloadCss($enabled)) {
                 return null;
@@ -60,7 +66,10 @@ final class AssetTagRenderer
             return str_replace('[[+file]]', $url, $jsPreloadTpl);
         }
 
-        return '<link rel="preload" href="' . htmlspecialchars($url, ENT_QUOTES) . '" as="script"' . $this->crossOriginAttribute($tag) . '>';
+        $href = htmlspecialchars($url, ENT_QUOTES);
+        $crossOrigin = $this->crossOriginAttribute($tag);
+
+        return '<link rel="preload" href="' . $href . '" as="script"' . $crossOrigin . '>';
     }
 
     /**

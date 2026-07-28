@@ -1,12 +1,16 @@
 <?php
 
+use MinifyX\Model\MinifyX;
 use MinifyX\Processor\HtmlMinifier;
 use MinifyX\Processor\ImageRewriter;
 use MinifyX\Processor\RegisteredAssetPageProcessor;
 
+$minifyxModelPath = MODX_CORE_PATH . 'components/minifyx/model/minifyx/';
+
 switch ($modx->event->name) {
     case 'OnMODXInit':
-        $file = $modx->getOption('minifyx_core_path', null, MODX_CORE_PATH) . 'components/minifyx/functions/function.php';
+        $file = $modx->getOption('minifyx_core_path', null, MODX_CORE_PATH)
+            . 'components/minifyx/functions/function.php';
         if (file_exists($file)) {
             include_once $file;
         }
@@ -14,7 +18,7 @@ switch ($modx->event->name) {
 
     case 'OnSiteRefresh':
         /** @var MinifyX $MinifyX */
-        if ($MinifyX = $modx->getService('minifyx', 'MinifyX', MODX_CORE_PATH . 'components/minifyx/model/minifyx/')) {
+        if ($MinifyX = $modx->getService('minifyx', MinifyX::class, $minifyxModelPath)) {
             if ($MinifyX->clearCache()) {
                 $modx->log(modX::LOG_LEVEL_INFO, $modx->lexicon('refresh_default') . ': MinifyX');
             }
@@ -38,7 +42,12 @@ switch ($modx->event->name) {
 
         if ($processRegistered) {
             $scriptProperties = [
-                'cacheFolder' => $modx->getOption('minifyx_cacheFolder', null, '/assets/components/minifyx/cache/', true),
+                'cacheFolder' => $modx->getOption(
+                    'minifyx_cacheFolder',
+                    null,
+                    '/assets/components/minifyx/cache/',
+                    true
+                ),
                 'forceUpdate' => $modx->getOption('minifyx_forceUpdate', null, false, true),
                 'minifyJs' => $modx->getOption('minifyx_minifyJs', null, false, true),
                 'minifyCss' => $modx->getOption('minifyx_minifyCss', null, false, true),
@@ -54,11 +63,22 @@ switch ($modx->event->name) {
                 $MinifyX = $modx->minifyx;
                 $MinifyX->reset($scriptProperties);
             } else {
-                $MinifyX = $modx->getService('minifyx', 'MinifyX', MODX_CORE_PATH . 'components/minifyx/model/minifyx/', $scriptProperties);
+                $MinifyX = $modx->getService(
+                    'minifyx',
+                    MinifyX::class,
+                    $minifyxModelPath,
+                    $scriptProperties
+                );
+            }
+
+            if (!$MinifyX instanceof MinifyX) {
+                $modx->log(modX::LOG_LEVEL_ERROR, '[MinifyX] Service could not be loaded.');
+                break;
             }
 
             if (!$MinifyX->prepareCacheFolder()) {
-                $modx->log(modX::LOG_LEVEL_ERROR, '[MinifyX] Could not create cache dir "' . ($MinifyX->config['cacheFolderPath'] ?? '') . '"');
+                $cacheDir = (string) ($MinifyX->config['cacheFolderPath'] ?? '');
+                $modx->log(modX::LOG_LEVEL_ERROR, '[MinifyX] Could not create cache dir "' . $cacheDir . '"');
                 break;
             }
 
@@ -79,11 +99,16 @@ switch ($modx->event->name) {
         }
 
         if ($processImages) {
-            if (!$modx->getService('minifyx', 'MinifyX', MODX_CORE_PATH . 'components/minifyx/model/minifyx/')) {
+            if (!$modx->getService('minifyx', MinifyX::class, $minifyxModelPath)) {
                 break;
             }
 
-            $connector = (string) $modx->getOption('minifyx_connector', null, '/assets/components/minifyx/munee.php', true);
+            $connector = (string) $modx->getOption(
+                'minifyx_connector',
+                null,
+                '/assets/components/minifyx/munee.php',
+                true
+            );
             $exclude = (string) $modx->getOption('minifyx_exclude_images', null, '#(thumb|/\d+x\d+/)#i');
             $default = (string) $modx->getOption('minifyx_images_filters', null, '', true);
             $signingKey = (string) $modx->getOption('minifyx_image_signing_key', null, '', true);

@@ -20,7 +20,8 @@ final class PathGuard
     {
         $candidate = $relativeOrAbsolute;
         if (!str_starts_with($candidate, '/') && !preg_match('#^[A-Za-z]:\\\\#', $candidate)) {
-            $candidate = $this->root . DIRECTORY_SEPARATOR . ltrim(str_replace(['\\', '/'], DIRECTORY_SEPARATOR, $candidate), '/\\');
+            $normalized = str_replace(['\\', '/'], DIRECTORY_SEPARATOR, $candidate);
+            $candidate = $this->root . DIRECTORY_SEPARATOR . ltrim($normalized, '/\\');
         }
 
         $real = realpath($candidate);

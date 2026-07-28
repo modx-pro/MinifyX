@@ -46,7 +46,10 @@ final class Compiler
                 continue;
             }
 
-            $js[] = $trimmed . (str_ends_with($trimmed, ';') || str_ends_with($trimmed, '{') || str_ends_with($trimmed, '}') ? '' : ';');
+            $needsSemicolon = str_ends_with($trimmed, ';')
+                || str_ends_with($trimmed, '{')
+                || str_ends_with($trimmed, '}');
+            $js[] = $trimmed . ($needsSemicolon ? '' : ';');
         }
 
         return implode("\n", $js) . "\n";

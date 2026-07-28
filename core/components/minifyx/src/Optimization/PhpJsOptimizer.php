@@ -9,8 +9,13 @@ use MinifyX\Contract\JsOptimizerInterface;
 
 final class PhpJsOptimizer implements JsOptimizerInterface
 {
-    public function optimize(string $combined, bool $minify, bool $mangle, string $jsMangler, string $jsManglerPath): string
-    {
+    public function optimize(
+        string $combined,
+        bool $minify,
+        bool $mangle,
+        string $jsMangler,
+        string $jsManglerPath
+    ): string {
         if (!$minify && !$mangle) {
             return $combined;
         }

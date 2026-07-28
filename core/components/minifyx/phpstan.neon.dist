@@ -1,9 +1,15 @@
+includes:
+    - vendor/phpstan/phpstan-phpunit/extension.neon
+
 parameters:
     level: 8
     paths:
         - src
+        - tests
     excludePaths:
         - src/Legacy/CoffeeScript
+    bootstrapFiles:
+        - vendor/autoload.php
     treatPhpDocTypesAsCertain: false
     ignoreErrors:
         -

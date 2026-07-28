@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace MinifyX\Tests;
 
 use MinifyX\Cache\AtomicFilesystemCache;
-use PHPUnit\Framework\TestCase;
 
 final class AtomicFilesystemCacheTest extends TestCase
 {

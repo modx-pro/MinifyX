@@ -57,7 +57,8 @@ final class ImageRewriter
             return $tag;
         }
 
-        if (!preg_match_all('/(src|height|width|filters)\s*=\s*[\'"]([^\'"]*)[\'"]/i', $tag, $properties, PREG_SET_ORDER)) {
+        $propertyPattern = '/(src|height|width|filters)\s*=\s*[\'"]([^\'"]*)[\'"]/i';
+        if (!preg_match_all($propertyPattern, $tag, $properties, PREG_SET_ORDER)) {
             return $tag;
         }
 
@@ -106,7 +107,8 @@ final class ImageRewriter
             $newSrc .= '&sig=' . rawurlencode($sig);
         }
 
-        $updated = preg_replace('/\ssrc\s*=\s*[\'"][^\'"]*[\'"]/i', ' src="' . htmlspecialchars($newSrc, ENT_QUOTES) . '"', $tag, 1);
+        $srcReplacement = ' src="' . htmlspecialchars($newSrc, ENT_QUOTES) . '"';
+        $updated = preg_replace('/\ssrc\s*=\s*[\'"][^\'"]*[\'"]/i', $srcReplacement, $tag, 1);
         if ($filters !== null) {
             $updated = preg_replace('/\sfilters\s*=\s*[\'"][^\'"]*[\'"]/i', '', (string) $updated, 1);
         }

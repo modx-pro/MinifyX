@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace MinifyX\Tests;
 
 use MinifyX\Pipeline\FileNormalizer;
-use PHPUnit\Framework\TestCase;
 
 final class FileNormalizerTest extends TestCase
 {

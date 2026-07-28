@@ -15,8 +15,13 @@ final class TerserJsOptimizer implements JsOptimizerInterface
         $this->runner = $runner ?? new ExternalProcessRunner();
     }
 
-    public function optimize(string $combined, bool $minify, bool $mangle, string $jsMangler, string $jsManglerPath): string
-    {
+    public function optimize(
+        string $combined,
+        bool $minify,
+        bool $mangle,
+        string $jsMangler,
+        string $jsManglerPath
+    ): string {
         $binary = $this->resolveBinary($jsMangler, $jsManglerPath, 'terser');
         if ($binary === null) {
             throw new JsManglerUnavailableException('Terser binary is not available.');

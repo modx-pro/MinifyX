@@ -131,6 +131,10 @@ final class LegacyModxAdapter implements ModxAdapterInterface
 
     public function getAssetsPath(): string
     {
-        return defined('MODX_ASSETS_PATH') ? (string) MODX_ASSETS_PATH : (string) $this->getOption('assets_path', null, '');
+        if (defined('MODX_ASSETS_PATH')) {
+            return (string) MODX_ASSETS_PATH;
+        }
+
+        return (string) $this->getOption('assets_path', null, '');
     }
 }

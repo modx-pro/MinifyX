@@ -25,8 +25,13 @@ final class FallbackJsOptimizer implements JsOptimizerInterface
         $this->esbuildOptimizer = new EsbuildJsOptimizer();
     }
 
-    public function optimize(string $combined, bool $minify, bool $mangle, string $jsMangler, string $jsManglerPath): string
-    {
+    public function optimize(
+        string $combined,
+        bool $minify,
+        bool $mangle,
+        string $jsMangler,
+        string $jsManglerPath
+    ): string {
         if (!$minify && !$mangle) {
             return $combined;
         }

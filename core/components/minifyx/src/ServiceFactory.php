@@ -65,9 +65,16 @@ final class ServiceFactory
     public static function createFromLegacyModx(object $modx, array $config = [], array $groups = []): AssetPipeline
     {
         $adapter = new LegacyModxAdapter($modx);
-        $corePath = (string) $adapter->getOption('minifyx_core_path', $config, $adapter->getCorePath()) . 'components/minifyx/';
-        $assetsPath = (string) $adapter->getOption('minifyx_assets_path', $config, $adapter->getAssetsPath()) . 'components/minifyx/';
-        $cacheFolder = (string) $adapter->getOption('minifyx_cacheFolder', null, '/assets/components/minifyx/cache/', true);
+        $corePath = (string) $adapter->getOption('minifyx_core_path', $config, $adapter->getCorePath())
+            . 'components/minifyx/';
+        $assetsPath = (string) $adapter->getOption('minifyx_assets_path', $config, $adapter->getAssetsPath())
+            . 'components/minifyx/';
+        $cacheFolder = (string) $adapter->getOption(
+            'minifyx_cacheFolder',
+            null,
+            '/assets/components/minifyx/cache/',
+            true
+        );
 
         $defaults = [
             'corePath' => $corePath,

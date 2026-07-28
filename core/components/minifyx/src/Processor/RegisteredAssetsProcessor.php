@@ -137,7 +137,8 @@ final class RegisteredAssetsProcessor
     private function parseAttributes(string $attributeString): array
     {
         $attrs = [];
-        if (preg_match_all('/([a-zA-Z_:][-a-zA-Z0-9_:.]*)(?:\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^\s"\'=<>`]+)))?/', $attributeString, $matches, PREG_SET_ORDER)) {
+        $pattern = '/([a-zA-Z_:][-a-zA-Z0-9_:.]*)(?:\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^\s"\'=<>`]+)))?/';
+        if (preg_match_all($pattern, $attributeString, $matches, PREG_SET_ORDER)) {
             foreach ($matches as $match) {
                 $name = strtolower($match[1]);
                 if (array_key_exists(2, $match)) {

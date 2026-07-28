@@ -12,7 +12,6 @@ use MinifyX\Optimization\FallbackJsOptimizer;
 use MinifyX\Optimization\MatthiasCssOptimizer;
 use MinifyX\Optimization\TerserJsOptimizer;
 use MinifyX\Processor\CssJsProcessor;
-use PHPUnit\Framework\TestCase;
 
 final class IssueFixesTest extends TestCase
 {
@@ -35,7 +34,10 @@ final class IssueFixesTest extends TestCase
     public function testEmptyCssUrlsArePreservedAfterMinify(): void
     {
         $cssPath = $this->dir . 'css/empty.css';
-        file_put_contents($cssPath, ".icon { background: url(''); }\n.icon2 { background: url(\"\"); }\n.icon3 { background: url(); }\n");
+        $cssContent = ".icon { background: url(''); }\n"
+            . ".icon2 { background: url(\"\"); }\n"
+            . ".icon3 { background: url(); }\n";
+        file_put_contents($cssPath, $cssContent);
 
         $outputPath = $this->dir . 'cache/bundle.min.css';
         $processor = new CssJsProcessor();
@@ -69,7 +71,9 @@ final class IssueFixesTest extends TestCase
     public function testDataAndExternalUrlsAreUntouched(): void
     {
         $cssPath = $this->dir . 'css/external.css';
-        $css = ".a{background:url(data:image/png;base64,abc)} .b{background:url(https://cdn.example/app.css)} .c{background:url(#hash)}\n";
+        $css = ".a{background:url(data:image/png;base64,abc)} "
+            . ".b{background:url(https://cdn.example/app.css)} "
+            . ".c{background:url(#hash)}\n";
         file_put_contents($cssPath, $css);
 
         $processor = new CssJsProcessor();

@@ -9,7 +9,6 @@ use MinifyX\Image\ImageController;
 use MinifyX\Image\ImageProcessorFactory;
 use MinifyX\Image\PathGuard;
 use MinifyX\Support\PathHelper;
-use PHPUnit\Framework\TestCase;
 
 final class SecurityFixesTest extends TestCase
 {

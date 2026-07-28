@@ -9,6 +9,7 @@ use MinifyX\Html\AssetTag;
 use MinifyX\Html\AssetTagParser;
 use MinifyX\Html\AssetTagRenderer;
 use MinifyX\Html\BundlePlanner;
+use MinifyX\Model\MinifyX;
 
 /**
  * Orchestrates registered asset bundling for OnWebPagePrerender.
@@ -32,7 +33,7 @@ final class RegisteredAssetPageProcessor
     /**
      * @return array{head: list<string>, body: list<string>}
      */
-    public function process(object $modx, \MinifyX $minifyX): array
+    public function process(object $modx, MinifyX $minifyX): array
     {
         $adapter = new LegacyModxAdapter($modx);
         $current = [
@@ -116,7 +117,12 @@ final class RegisteredAssetPageProcessor
                         $this->planner->bundleAttributes($group),
                         ''
                     );
-                    $rendered = $this->renderer->renderBundle($type, (string) $result['url'], $bundleTag, $renderConfig);
+                    $rendered = $this->renderer->renderBundle(
+                        $type,
+                        (string) $result['url'],
+                        $bundleTag,
+                        $renderConfig
+                    );
                     $prepared[$key][$type][] = [
                         'preload' => $rendered['preload'],
                         'tag' => $rendered['tag'],
@@ -154,8 +160,13 @@ final class RegisteredAssetPageProcessor
      * @param array<string, array<string, list<string>>> $raw
      * @param array<string, array<string, list<array<string, mixed>>>> $included
      */
-    private function processRawBlocks(LegacyModxAdapter $adapter, object $modx, \MinifyX $minifyX, array &$raw, array &$included): void
-    {
+    private function processRawBlocks(
+        LegacyModxAdapter $adapter,
+        object $modx,
+        MinifyX $minifyX,
+        array &$raw,
+        array &$included
+    ): void {
         $resourceId = isset($modx->resource->id) ? (int) $modx->resource->id : 0;
         $tmpDir = $minifyX->getTmpDir() . 'resources/' . $resourceId . '/';
 

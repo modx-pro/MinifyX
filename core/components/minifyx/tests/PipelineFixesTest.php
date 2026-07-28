@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace MinifyX\Tests;
 
+use MinifyX\Model\MinifyX;
+
 use MinifyX\Processor\RegisteredAssetsProcessor;
-use PHPUnit\Framework\TestCase;
 
 final class PipelineFixesTest extends TestCase
 {
@@ -34,7 +35,7 @@ final class PipelineFixesTest extends TestCase
     public function testCompileFailureDoesNotPublish(): void
     {
         $modx = new FakeModx('web');
-        $mx = new \MinifyX($modx, [
+        $mx = new MinifyX($modx, [
             'cacheFolder' => '/assets/components/minifyx/cache/',
             'forceUpdate' => true,
         ]);
@@ -46,7 +47,7 @@ final class PipelineFixesTest extends TestCase
     {
         file_put_contents($this->base . 'assets/css/param.scss', 'body { color: $accent; }');
         $modx = new FakeModx('web');
-        $mx = new \MinifyX($modx, [
+        $mx = new MinifyX($modx, [
             'cacheFolder' => '/assets/components/minifyx/cache/',
             'forceUpdate' => true,
         ]);
@@ -61,7 +62,7 @@ final class PipelineFixesTest extends TestCase
     public function testResetSyncsExtensions(): void
     {
         $modx = new FakeModx('web');
-        $mx = new \MinifyX($modx, ['cacheFolder' => '/assets/components/minifyx/cache/']);
+        $mx = new MinifyX($modx, ['cacheFolder' => '/assets/components/minifyx/cache/']);
         $mx->minify(true);
         self::assertSame('.min.js', $mx->config['jsExt']);
         $mx->reset(['minifyJs' => false, 'minifyCss' => false, 'cacheFolder' => '/assets/components/minifyx/cache/']);
@@ -77,7 +78,7 @@ final class PipelineFixesTest extends TestCase
         file_put_contents($hook, '<?php $MinifyX->setContent($MinifyX->getContent() . "/*hooked*/");');
 
         $modx = new FakeModx('web');
-        $mx = new \MinifyX($modx, [
+        $mx = new MinifyX($modx, [
             'cacheFolder' => '/assets/components/minifyx/cache/',
             'jsSources' => 'assets/js/one.js',
             'hooks' => 'testHook.php',

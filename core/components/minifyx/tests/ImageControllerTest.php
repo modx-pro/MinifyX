@@ -8,7 +8,6 @@ use MinifyX\Cache\AtomicFilesystemCache;
 use MinifyX\Image\ImageController;
 use MinifyX\Image\ImageProcessorFactory;
 use MinifyX\Image\PathGuard;
-use PHPUnit\Framework\TestCase;
 
 final class ImageControllerTest extends TestCase
 {
