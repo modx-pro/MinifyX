@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main, beta]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - php: '8.2'
+          - php: '8.3'
+          - php: '8.4'
+          - php: '8.5'
+    defaults:
+      run:
+        working-directory: core/components/minifyx
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: gd, mbstring, json
+          coverage: none
+      - name: Validate PHP syntax
+        run: find src model -name '*.php' -print0 | xargs -0 -n1 php -l
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
+      - name: PHPUnit
+        run: composer test
+      - name: PHPStan
+        run: composer phpstan
+      - name: Composer audit
+        run: composer audit
+
+  imagick:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: core/components/minifyx
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PHP with Imagick
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: imagick, mbstring, json
+          coverage: none
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
+      - name: Test Imagick processor
+        run: composer test -- --filter ImagickImageProcessorTest

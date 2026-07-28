@@ -1,3 +1,6 @@
 .idea
 core/components/minifyx/munee/*
 /core/components/minifyx/vendor/
+/core/components/minifyx/.phpunit.cache/
+/core/components/minifyx/.phpunit.result.cache
+/core/components/minifyx/.phpstan.cache/

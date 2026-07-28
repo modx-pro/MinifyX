@@ -1,36 +1,9 @@
 <?php
 
-if (!defined('MODX_API_MODE')) {
-	define('MODX_API_MODE', true);
-}
-if (file_exists(dirname(dirname(dirname(dirname(__FILE__)))).'/index.php')) {
-    /** @noinspection PhpIncludeInspection */
-    require_once dirname(dirname(dirname(dirname(__FILE__)))).'/index.php';
-}
-else {
-    require_once dirname(dirname(dirname(dirname(dirname(__FILE__))))) . '/index.php';
-}
-$modx->getService('error','error.modError');
+declare(strict_types=1);
 
-$MinifyX = $modx->getService('minifyx','MinifyX', MODX_CORE_PATH.'components/minifyx/model/minifyx/');
-//$MinifyX = new MinifyX($modx, array());
+/**
+ * @deprecated Use /assets/components/minifyx/minifyx.php. This alias is removed in MinifyX 4.0.
+ */
 
-if (!empty($_GET['files'])) {
-	$files = $MinifyX->prepareFiles($_GET['files']);
-
-	$options = array(
-		'image' => array(
-			'checkReferrer' => $modx->getOption('munee_checkReferrer', null, 'true', true),
-			'allowedFiltersTimeLimit' => $modx->getOption('munee_allowedFiltersTimeLimit', null, -1, true),
-			'numberOfAllowedFilters' => $modx->getOption('munee_numberOfAllowedFilters', null, 100, true),
-			'imageProcessor' => $modx->getOption('munee_imageProcessor', null, 'GD', true),
-			'placeholders' => $modx->fromJSON(
-				$modx->getOption('munee_placeholders', null, '{"*":"http://placehold.it/500x500/&text=MinifyX"}', true)
-			),
-		),
-		'setHeaders' => true,
-		'maxAge' => 0
-	);
-
-	echo $MinifyX->Munee($files, $options);
-}
+require __DIR__ . '/minifyx.php';

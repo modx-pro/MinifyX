@@ -88,6 +88,42 @@ $tmp = [
         'xtype' => 'textfield',
         'value' => '',
     ],
+    'mangleJs' => [
+        'xtype' => 'combo-boolean',
+        'value' => false,
+    ],
+    'jsMangler' => [
+        'xtype' => 'list',
+        'value' => 'terser',
+        'options' => [
+            ['name' => 'Terser', 'value' => 'terser'],
+            ['name' => 'esbuild', 'value' => 'esbuild'],
+        ],
+    ],
+    'jsManglerPath' => [
+        'xtype' => 'textfield',
+        'value' => '',
+    ],
+    'sourceMaps' => [
+        'xtype' => 'combo-boolean',
+        'value' => false,
+    ],
+    'preloadCss' => [
+        'xtype' => 'combo-boolean',
+        'value' => false,
+    ],
+    'preloadJs' => [
+        'xtype' => 'combo-boolean',
+        'value' => false,
+    ],
+    'cssPreloadTpl' => [
+        'xtype' => 'textfield',
+        'value' => '',
+    ],
+    'jsPreloadTpl' => [
+        'xtype' => 'textfield',
+        'value' => '',
+    ],
 ];
 
 foreach ($tmp as $k => $v) {

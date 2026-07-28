@@ -1,0 +1,18 @@
+includes:
+    - vendor/phpstan/phpstan-phpunit/extension.neon
+
+parameters:
+    level: 8
+    paths:
+        - src
+        - tests
+    bootstrapFiles:
+        - vendor/autoload.php
+    treatPhpDocTypesAsCertain: false
+    ignoreErrors:
+        -
+            message: '#expects GdImage#'
+            path: src/Image/GdImageProcessor.php
+        -
+            message: '#never returns resource#'
+            path: src/Image/GdImageProcessor.php
