@@ -6,8 +6,6 @@ parameters:
     paths:
         - src
         - tests
-    excludePaths:
-        - src/Legacy/CoffeeScript
     bootstrapFiles:
         - vendor/autoload.php
     treatPhpDocTypesAsCertain: false

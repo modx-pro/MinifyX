@@ -21,6 +21,7 @@ final class PipelineFixesTest extends TestCase
         @mkdir($this->cache, 0755, true);
         file_put_contents($this->base . 'assets/css/vars.scss', '$c: red; body { color: $c; }');
         file_put_contents($this->base . 'assets/js/one.js', "var one = 1;\n");
+        file_put_contents($this->base . 'assets/js/legacy.coffee', 'square = (x) -> x * x');
         require_once dirname(__DIR__) . '/model/minifyx/minifyx.class.php';
     }
 
@@ -30,6 +31,7 @@ final class PipelineFixesTest extends TestCase
             @unlink($file);
         }
         @unlink($this->base . 'assets/css/vars.scss');
+        @unlink($this->base . 'assets/js/legacy.coffee');
     }
 
     public function testCompileFailureDoesNotPublish(): void
@@ -41,6 +43,42 @@ final class PipelineFixesTest extends TestCase
         ]);
         $result = $mx->processFiles(['assets/missing-file.js'], 'js');
         self::assertNull($result);
+    }
+
+    public function testPipelineClassifiesMissingAndEmptySources(): void
+    {
+        $modx = new FakeModx('web');
+        $mx = new MinifyX($modx, ['cacheFolder' => '/assets/components/minifyx/cache/']);
+
+        $empty = $mx->getPipeline()->processAndSave([], 'js', $mx);
+        self::assertSame('no_sources', $empty['errorCode']);
+        self::assertSame('', $empty['sourceFile']);
+
+        $missing = $mx->getPipeline()->processAndSave(['assets/missing-secret.js'], 'js', $mx);
+        self::assertSame('source_resolution', $missing['errorCode']);
+        self::assertSame('missing-secret.js', $missing['sourceFile']);
+        self::assertStringNotContainsString(MODX_BASE_PATH, $missing['error']);
+
+        $mx->setConfig(['jsFilename' => '../invalid']);
+        $invalid = $mx->getPipeline()->processAndSave(['assets/js/one.js'], 'js', $mx);
+        self::assertSame('invalid_filename', $invalid['errorCode']);
+        self::assertSame('configuration', $invalid['phase']);
+    }
+
+    public function testPipelineReturnsStructuredUnsupportedCoffeeError(): void
+    {
+        $modx = new FakeModx('web');
+        $mx = new MinifyX($modx, [
+            'cacheFolder' => '/assets/components/minifyx/cache/',
+            'forceUpdate' => true,
+        ]);
+
+        $result = $mx->getPipeline()->processAndSave(['assets/js/legacy.coffee'], 'js', $mx);
+
+        self::assertFalse($result['success']);
+        self::assertSame('unsupported_source_type', $result['errorCode']);
+        self::assertStringContainsString('Precompile', $result['error']);
+        self::assertSame('legacy.coffee', $result['sourceFile']);
     }
 
     public function testQueryParamsReachScssCompiler(): void

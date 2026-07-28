@@ -125,7 +125,8 @@ final class AtomicFilesystemCache implements CacheStoreInterface
             return;
         }
 
-        $pattern = '/^[a-z0-9._-]+_[a-z0-9]{' . $this->hashLength . '}\.(?:min\.)?(?:js|css)$/i';
+        $pattern = '/^[a-z0-9._-]+_[a-z0-9]{' . $this->hashLength
+            . '}\.(?:min\.)?(?:js|css)(?:\.map)?$/i';
         $toDelete = [];
         foreach ($trackedFiles as $file) {
             $safe = PathHelper::sanitizeFilename((string) $file);

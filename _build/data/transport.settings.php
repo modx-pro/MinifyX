@@ -7,6 +7,10 @@ $tmp = [
         'xtype' => 'combo-boolean',
         'value' => false,
     ],
+    'debug' => [
+        'xtype' => 'combo-boolean',
+        'value' => false,
+    ],
     'process_images' => [
         'xtype' => 'combo-boolean',
         'value' => false,
@@ -54,6 +58,10 @@ $tmp = [
         'xtype' => 'textfield',
         'value' => '/assets/components/minifyx/cache/',
     ],
+    'cache' => [
+        'xtype' => 'textfield',
+        'value' => MODX_CORE_PATH . 'cache/default/minifyx/',
+    ],
     'forceUpdate' => [
         'xtype' => 'combo-boolean',
         'value' => false,
@@ -68,10 +76,22 @@ $tmp = [
     ],
     'connector' => [
         'xtype' => 'textfield',
-        'value' => '/assets/components/minifyx/munee.php',
+        'value' => '/assets/components/minifyx/minifyx.php',
+    ],
+    'imageProcessor' => [
+        'xtype' => 'list',
+        'value' => 'GD',
+        'options' => [
+            ['text' => 'GD', 'value' => 'GD'],
+            ['text' => 'Imagick', 'value' => 'Imagick'],
+        ],
     ],
     'image_signing_key' => [
         'xtype' => 'textfield',
+        'value' => '',
+    ],
+    'image_signing_keys' => [
+        'xtype' => 'textarea',
         'value' => '',
     ],
     'image_max_pixels' => [
@@ -82,7 +102,31 @@ $tmp = [
         'xtype' => 'numberfield',
         'value' => 20000000,
     ],
+    'image_rate_limit_max' => [
+        'xtype' => 'numberfield',
+        'value' => 0,
+    ],
+    'image_rate_limit_window' => [
+        'xtype' => 'numberfield',
+        'value' => 60,
+    ],
+    'image_rate_limit_salt' => [
+        'xtype' => 'textfield',
+        'value' => '',
+    ],
     'mangleJs' => [
+        'xtype' => 'combo-boolean',
+        'value' => false,
+    ],
+    'bundleJsModules' => [
+        'xtype' => 'combo-boolean',
+        'value' => false,
+    ],
+    'sourceMaps' => [
+        'xtype' => 'combo-boolean',
+        'value' => false,
+    ],
+    'parallelBuild' => [
         'xtype' => 'combo-boolean',
         'value' => false,
     ],
@@ -98,6 +142,14 @@ $tmp = [
         'xtype' => 'textfield',
         'value' => '',
     ],
+    'esbuildPath' => [
+        'xtype' => 'textfield',
+        'value' => '',
+    ],
+    'jsManglerMaxInputBytes' => [
+        'xtype' => 'numberfield',
+        'value' => 5000000,
+    ],
     'preloadCss' => [
         'xtype' => 'combo-boolean',
         'value' => false,
@@ -105,6 +157,14 @@ $tmp = [
     'preloadJs' => [
         'xtype' => 'combo-boolean',
         'value' => false,
+    ],
+    'bundleIntegrity' => [
+        'xtype' => 'combo-boolean',
+        'value' => false,
+    ],
+    'cors_origin' => [
+        'xtype' => 'textfield',
+        'value' => '',
     ],
     'cssPreloadTpl' => [
         'xtype' => 'textfield',

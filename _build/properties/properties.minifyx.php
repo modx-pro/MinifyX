@@ -104,6 +104,10 @@ $tmp = [
         'xtype' => 'textfield',
         'value' => '',
     ],
+    'sourceMaps' => [
+        'xtype' => 'combo-boolean',
+        'value' => false,
+    ],
     'preloadCss' => [
         'xtype' => 'combo-boolean',
         'value' => false,

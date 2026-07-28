@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace MinifyX\Adapter;
 
 use MinifyX\Contract\ModxAdapterInterface;
+use MinifyX\Support\UrlHelper;
 
 /**
- * Thin adapter around a legacy modX instance for MODX 2.8 and 3.x.
+ * Isolated getService-era compatibility adapter for MODX 3.
  */
 final class LegacyModxAdapter implements ModxAdapterInterface
 {
@@ -116,7 +117,9 @@ final class LegacyModxAdapter implements ModxAdapterInterface
 
     public function getSiteUrl(): string
     {
-        return (string) $this->getOption('site_url', null, '');
+        $siteUrl = (string) $this->getOption('site_url', null, '');
+
+        return UrlHelper::schemeAwareSiteUrl($siteUrl, UrlHelper::detectHttpsFromServer());
     }
 
     public function getBasePath(): string

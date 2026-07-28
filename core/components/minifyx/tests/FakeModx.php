@@ -6,10 +6,26 @@ namespace MinifyX\Tests;
 
 use MinifyX\Model\MinifyX;
 
+final class FakeEvent
+{
+    public string $name = '';
+}
+
+final class FakeResource
+{
+    public int $id = 1;
+    public string $_output = '';
+}
+
 final class FakeModx
 {
+    public const LOG_LEVEL_INFO = 1;
+    public const LOG_LEVEL_ERROR = 3;
+
     public object $context;
-    public object $resource;
+    public FakeResource $resource;
+    public FakeEvent $event;
+    public ?MinifyX $minifyx = null;
     /** @var array<string, mixed> */
     public array $options = [];
     /** @var list<array{0:int,1:string}> */
@@ -22,11 +38,16 @@ final class FakeModx
     public array $scripts = [];
     /** @var list<string> */
     public array $startup = [];
+    /** @var list<string> */
+    public array $sjscripts = [];
+    /** @var list<string> */
+    public array $jscripts = [];
 
     public function __construct(string $contextKey = 'web')
     {
         $this->context = (object) ['key' => $contextKey];
-        $this->resource = (object) ['id' => 1, '_output' => ''];
+        $this->resource = new FakeResource();
+        $this->event = new FakeEvent();
         $this->options = [
             'site_url' => 'http://example.test/',
             'core_path' => MODX_CORE_PATH,
@@ -102,6 +123,16 @@ final class FakeModx
         $this->startup[] = $tag;
     }
 
+    public function getRegisteredClientStartupScripts(): string
+    {
+        return implode("\n", $this->sjscripts);
+    }
+
+    public function getRegisteredClientScripts(): string
+    {
+        return implode("\n", $this->jscripts);
+    }
+
     /**
      * @param array<string, mixed> $properties
      * @return mixed
@@ -118,6 +149,8 @@ final class FakeModx
     {
         require_once dirname(__DIR__) . '/model/minifyx/minifyx.class.php';
 
-        return new MinifyX($this, $config);
+        $this->minifyx = new MinifyX($this, $config);
+
+        return $this->minifyx;
     }
 }

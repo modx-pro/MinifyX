@@ -14,6 +14,9 @@ final class BuildResult
     private bool $written;
     private bool $success;
     private string $error;
+    private string $errorCode;
+    private string $sourceFile;
+    private string $phase;
 
     public function __construct(
         string $content = '',
@@ -23,7 +26,10 @@ final class BuildResult
         bool $fromCache = false,
         bool $written = false,
         bool $success = false,
-        string $error = ''
+        string $error = '',
+        string $errorCode = '',
+        string $sourceFile = '',
+        string $phase = ''
     ) {
         $this->content = $content;
         $this->filename = $filename;
@@ -33,11 +39,18 @@ final class BuildResult
         $this->written = $written;
         $this->success = $success;
         $this->error = $error;
+        $this->errorCode = $errorCode;
+        $this->sourceFile = $sourceFile;
+        $this->phase = $phase;
     }
 
-    public static function failure(string $error): self
-    {
-        return new self('', '', '', '', false, false, false, $error);
+    public static function failure(
+        string $error,
+        string $errorCode = 'compile_failed',
+        string $sourceFile = '',
+        string $phase = 'compile'
+    ): self {
+        return new self('', '', '', '', false, false, false, $error, $errorCode, $sourceFile, $phase);
     }
 
     /** @return array<string, mixed> */
@@ -52,6 +65,9 @@ final class BuildResult
             'written' => $this->written,
             'success' => $this->success,
             'error' => $this->error,
+            'errorCode' => $this->errorCode,
+            'sourceFile' => $this->sourceFile,
+            'phase' => $this->phase,
         ];
     }
 
@@ -93,6 +109,21 @@ final class BuildResult
     public function getError(): string
     {
         return $this->error;
+    }
+
+    public function getErrorCode(): string
+    {
+        return $this->errorCode;
+    }
+
+    public function getSourceFile(): string
+    {
+        return $this->sourceFile;
+    }
+
+    public function getPhase(): string
+    {
+        return $this->phase;
     }
 
     public function withContent(string $content): self

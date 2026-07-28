@@ -2,7 +2,15 @@
 
 declare(strict_types=1);
 
+use MinifyX\Tests\ModxStub;
+
 require_once dirname(__DIR__) . '/vendor/autoload.php';
+require_once __DIR__ . '/ModxStub.php';
+require_once __DIR__ . '/Modx3Stub.php';
+
+if (!class_exists('modX')) {
+    class_alias(ModxStub::class, 'modX');
+}
 
 if (!defined('MODX_BASE_PATH')) {
     define('MODX_BASE_PATH', sys_get_temp_dir() . '/minifyx-tests-base/');

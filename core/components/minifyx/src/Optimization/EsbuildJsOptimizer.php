@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace MinifyX\Optimization;
 
 use MinifyX\Contract\JsOptimizerInterface;
+use MinifyX\Contract\SourceMapProviderInterface;
 
-final class EsbuildJsOptimizer implements JsOptimizerInterface
+final class EsbuildJsOptimizer implements JsOptimizerInterface, SourceMapProviderInterface
 {
     private ExternalProcessRunner $runner;
+    private bool $sourceMaps = false;
+    private ?string $sourceMap = null;
 
     public function __construct(?ExternalProcessRunner $runner = null)
     {
@@ -31,13 +34,30 @@ final class EsbuildJsOptimizer implements JsOptimizerInterface
         if ($minify || $mangle) {
             $command[] = '--minify';
         }
+        if ($this->sourceMaps) {
+            $command[] = '--sourcemap=inline';
+        }
 
-        return $this->runner->run($command, $combined);
+        $result = InlineSourceMap::extract($this->runner->run($command, $combined));
+        $this->sourceMap = $result['map'];
+
+        return $result['code'];
     }
 
     public function getBackendId(): string
     {
         return 'esbuild';
+    }
+
+    public function setSourceMaps(bool $sourceMaps): void
+    {
+        $this->sourceMaps = $sourceMaps;
+        $this->sourceMap = null;
+    }
+
+    public function getSourceMap(): ?string
+    {
+        return $this->sourceMap;
     }
 
     private function resolveBinary(string $jsMangler, string $jsManglerPath): ?string

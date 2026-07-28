@@ -12,7 +12,9 @@ use MinifyX\Contract\AssetProcessorInterface;
 use MinifyX\Contract\CacheStoreInterface;
 use MinifyX\Contract\HookHostInterface;
 use MinifyX\Contract\ModxAdapterInterface;
+use MinifyX\Contract\SourceMapProviderInterface;
 use MinifyX\Hook\HookRunner;
+use MinifyX\Processor\UnsupportedSourceTypeException;
 use MinifyX\Support\PathHelper;
 
 final class AssetPipeline
@@ -23,6 +25,7 @@ final class AssetPipeline
     private AssetProcessorInterface $processor;
     private CacheStoreInterface $cache;
     private HookRunner $hooks;
+    private ImportDependencyResolver $dependencyResolver;
 
     /** @var array<string, array<int, string>> */
     private array $groups;
@@ -47,7 +50,8 @@ final class AssetPipeline
         AssetProcessorInterface $processor,
         CacheStoreInterface $cache,
         HookRunner $hooks,
-        array $groups = []
+        array $groups = [],
+        ?ImportDependencyResolver $dependencyResolver = null
     ) {
         $this->modx = $modx;
         $this->config = $config;
@@ -56,6 +60,7 @@ final class AssetPipeline
         $this->cache = $cache;
         $this->hooks = $hooks;
         $this->groups = $groups;
+        $this->dependencyResolver = $dependencyResolver ?? new ImportDependencyResolver($modx->getBasePath());
     }
 
     public function getConfig(): Config
@@ -129,24 +134,48 @@ final class AssetPipeline
         $this->filetype = $type;
         $normalized = $this->normalizer->normalize($files);
         if ($normalized['paths'] === []) {
-            return BuildResult::failure('No source files.')->toArray();
+            return BuildResult::failure('No source files.', 'no_sources', '', 'source_resolution')->toArray();
         }
 
         $absolute = $this->normalizer->toAbsolutePaths($normalized['paths']);
         if ($absolute === []) {
-            return BuildResult::failure('No resolvable source files inside webroot.')->toArray();
+            return BuildResult::failure(
+                'No resolvable source files inside webroot.',
+                'source_resolution',
+                $this->safeSourceFile($normalized['paths'][0] ?? ''),
+                'source_resolution'
+            )->toArray();
+        }
+        foreach ($absolute as $index => $source) {
+            if (!is_file($source)) {
+                return BuildResult::failure(
+                    'Source file could not be resolved.',
+                    'source_resolution',
+                    $this->safeSourceFile($normalized['paths'][$index] ?? ''),
+                    'source_resolution'
+                )->toArray();
+            }
         }
 
         $minify = $forceMinify || (bool) $this->config->get('minify' . ucfirst($type), false);
         $mangleJs = $type === 'js' && !empty($this->config->get('mangleJs', false));
         $defaultFilename = $type === 'css' ? 'styles' : 'scripts';
-        $basename = PathHelper::sanitizeFilename(
-            (string) $this->config->get($type . 'Filename', $defaultFilename)
-        );
+        try {
+            $basename = PathHelper::sanitizeFilename(
+                (string) $this->config->get($type . 'Filename', $defaultFilename)
+            );
+        } catch (\InvalidArgumentException $e) {
+            return BuildResult::failure('Invalid bundle filename.', 'invalid_filename', '', 'configuration')->toArray();
+        }
         $extension = (string) $this->config->get($type . 'Ext', $type === 'css' ? '.css' : '.js');
         $jsMangler = (string) $this->config->get('jsMangler', 'terser');
         $jsManglerPath = (string) $this->config->get('jsManglerPath', '');
+        $sourceMaps = (bool) $this->config->get('sourceMaps', false);
+        $bundleJsModules = (bool) $this->config->get('bundleJsModules', false);
+        $jsModule = $type === 'js' && (bool) $this->config->get('jsModule', false);
         $hooks = $this->listParam('hooks');
+        $dependencies = $type === 'css' ? $this->dependencyResolver->resolve($absolute) : [];
+        $signaturePaths = array_values(array_unique(array_merge($absolute, $dependencies)));
 
         /** @var array<string, string> $queryParams */
         $queryParams = [];
@@ -157,7 +186,7 @@ final class AssetPipeline
         }
 
         $signature = new BuildSignature(
-            $absolute,
+            $signaturePaths,
             [
                 'minify' => $minify || $mangleJs,
                 'mangleJs' => $mangleJs,
@@ -166,6 +195,10 @@ final class AssetPipeline
                 'jsMangler' => $jsMangler,
                 'jsManglerPath' => $jsManglerPath,
                 'jsBackend' => $mangleJs ? $jsMangler : 'php-minify',
+                'sourceMaps' => $sourceMaps,
+                'bundleJsModules' => $bundleJsModules,
+                'jsModule' => $jsModule,
+                'moduleBackend' => $jsModule && $bundleJsModules ? 'esbuild-bundle' : 'none',
             ],
             $hooks
         );
@@ -199,12 +232,31 @@ final class AssetPipeline
 
         try {
             $this->compilerCalls++;
-            $content = $this->processor->process($request->getAbsolutePaths(), $request->toProcessorOptions($hooks));
+            $processorOptions = $request->toProcessorOptions($hooks);
+            $processorOptions['sourceMaps'] = $sourceMaps;
+            $processorOptions['bundleJsModules'] = $bundleJsModules;
+            $processorOptions['jsModule'] = $jsModule;
+            $content = $this->processor->process($request->getAbsolutePaths(), $processorOptions);
+        } catch (UnsupportedSourceTypeException $e) {
+            return BuildResult::failure(
+                $e->getMessage(),
+                'unsupported_source_type',
+                $this->safeSourceFile($normalized['paths'][0] ?? ''),
+                'compile'
+            )->toArray();
         } catch (\Throwable $e) {
-            return BuildResult::failure($e->getMessage())->toArray();
+            return BuildResult::failure(
+                'Asset compilation failed.',
+                'compile_failed',
+                $this->safeSourceFile($normalized['paths'][0] ?? ''),
+                'compile'
+            )->toArray();
         }
 
         $this->content = $content;
+        $sourceMap = $sourceMaps && $this->processor instanceof SourceMapProviderInterface
+            ? $this->processor->getSourceMap()
+            : null;
         $this->filename = $basename . '_' . $fingerprint . $extension;
         $host->setFilename($this->filename);
         $host->setContent($this->content);
@@ -217,6 +269,7 @@ final class AssetPipeline
             if ($this->filename === '') {
                 return $this->successResult($this->content, '', false, false)->toArray();
             }
+            $sourceMap = null;
             $hookFingerprint = substr(hash('sha1', $fingerprint . '|' . $this->content), 0, 10);
             if (!str_contains($this->filename, '_')) {
                 $this->filename = $basename . '_' . $hookFingerprint . $extension;
@@ -227,14 +280,25 @@ final class AssetPipeline
         try {
             $safeName = PathHelper::sanitizeFilename($this->filename);
         } catch (\InvalidArgumentException $e) {
-            return BuildResult::failure($e->getMessage())->toArray();
+            return BuildResult::failure('Invalid bundle filename.', 'invalid_filename', '', 'write')->toArray();
         }
         $this->filename = $safeName;
         $host->setFilename($this->filename);
 
+        if (is_string($sourceMap) && $sourceMap !== '') {
+            $mapName = $this->filename . '.map';
+            if (!$this->cache->write($mapName, $sourceMap, $forceUpdate)) {
+                return BuildResult::failure('Could not write source map.', 'map_write_failed', '', 'write')->toArray();
+            }
+            $mapReference = $type === 'css'
+                ? '/*# sourceMappingURL=' . basename($mapName) . ' */'
+                : '//# sourceMappingURL=' . basename($mapName);
+            $this->content = rtrim($this->content) . "\n" . $mapReference . "\n";
+            $host->setContent($this->content);
+        }
         $written = $this->cache->write($this->filename, $this->content, $forceUpdate);
         if (!$written) {
-            return BuildResult::failure('Could not write cache file.')->toArray();
+            return BuildResult::failure('Could not write cache file.', 'cache_write_failed', '', 'write')->toArray();
         }
         $this->outputWrites++;
         $this->trackedFiles[] = $this->filename;
@@ -278,7 +342,7 @@ final class AssetPipeline
     public function clearCache(): bool
     {
         $this->cache->clear((bool) $this->config->get('forceDelete', false), $this->trackedFiles);
-        $tmp = (string) $this->config->get('munee_cache', '');
+        $tmp = (string) $this->config->get('minifyx_cache', '');
         if ($tmp !== '') {
             return $this->cache->removeDirectory($tmp);
         }
@@ -317,5 +381,13 @@ final class AssetPipeline
         $path = $filename !== '' ? $this->cache->path($filename) : '';
 
         return new BuildResult($content, $filename, $url, $path, $fromCache, $written, true, '');
+    }
+
+    private function safeSourceFile(string $source): string
+    {
+        $path = parse_url($source, PHP_URL_PATH);
+        $path = is_string($path) ? $path : $source;
+
+        return basename(str_replace('\\', '/', $path));
     }
 }

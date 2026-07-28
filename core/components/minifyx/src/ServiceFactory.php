@@ -8,13 +8,15 @@ use MinifyX\Adapter\LegacyModxAdapter;
 use MinifyX\Cache\AtomicFilesystemCache;
 use MinifyX\Contract\ModxAdapterInterface;
 use MinifyX\Hook\HookRunner;
+use MinifyX\Optimization\EsbuildModuleBundler;
+use MinifyX\Optimization\ExternalProcessRunner;
 use MinifyX\Optimization\FallbackJsOptimizer;
 use MinifyX\Pipeline\AssetPipeline;
 use MinifyX\Pipeline\FileNormalizer;
 use MinifyX\Processor\CssJsProcessor;
-use MinifyX\Processor\LegacyCoffeeCompiler;
 use MinifyX\Processor\LessCompiler;
 use MinifyX\Processor\ScssCompiler;
+use MinifyX\Support\SettingUpgradeResolver;
 
 /**
  * Factory that wires the modern pure-PHP pipeline.
@@ -42,14 +44,19 @@ final class ServiceFactory
             $modx->log(2, $message);
         };
 
+        $processRunner = new ExternalProcessRunner(
+            30,
+            5_000_000,
+            (int) $config->get('jsManglerMaxInputBytes', 5_000_000)
+        );
         $processor = new CssJsProcessor(
             [
                 new ScssCompiler(),
                 new LessCompiler(),
-                new LegacyCoffeeCompiler($logger),
             ],
             null,
-            new FallbackJsOptimizer($logger)
+            new FallbackJsOptimizer($logger, $processRunner),
+            new EsbuildModuleBundler($processRunner)
         );
 
         $normalizer = new FileNormalizer($modx->getBasePath(), $modx->getSiteUrl());
@@ -90,8 +97,13 @@ final class ServiceFactory
             'minifyJs' => false,
             'minifyCss' => false,
             'mangleJs' => false,
+            'bundleJsModules' => false,
+            'sourceMaps' => false,
+            'parallelBuild' => false,
             'jsMangler' => 'terser',
             'jsManglerPath' => '',
+            'esbuildPath' => '',
+            'jsManglerMaxInputBytes' => 5_000_000,
             'preloadCss' => false,
             'preloadJs' => false,
             'cssPreloadTpl' => '',
@@ -102,7 +114,12 @@ final class ServiceFactory
             'cssPlaceholder' => 'MinifyX.css',
             'forceUpdate' => $adapter->getContextKey() === 'mgr',
             'forceDelete' => (bool) $adapter->getOption('minifyx_forceDelete', null, false),
-            'munee_cache' => $adapter->getCorePath() . 'cache/default/munee/',
+            'minifyx_cache' => (string) SettingUpgradeResolver::read(
+                $adapter,
+                'minifyx_cache',
+                'munee_cache',
+                $adapter->getCorePath() . 'cache/default/minifyx/'
+            ),
             'hash_length' => 10,
             'hooksPath' => $adapter->getCorePath() . 'components/minifyx/hooks/',
             'hooks' => '',

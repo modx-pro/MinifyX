@@ -3,12 +3,13 @@
 namespace MinifyX\Model;
 
 use InvalidArgumentException;
+use MinifyX\Contract\HookHostInterface;
 use MinifyX\Html\AssetTag;
 use MinifyX\Html\AssetTagRenderer;
 use MinifyX\Pipeline\AssetPipeline;
 use MinifyX\ServiceFactory;
-use MinifyX\Contract\HookHostInterface;
 use MinifyX\Support\PathHelper;
+use MinifyX\Support\SettingUpgradeResolver;
 use RuntimeException;
 use Throwable;
 
@@ -96,6 +97,7 @@ class MinifyX implements HookHostInterface
 
     public function setConfig(array $config = []): void
     {
+        $config = SettingUpgradeResolver::resolve($config);
         $this->config = array_merge($this->config, $config);
         if (
             isset($config['minifyJs'])
@@ -326,7 +328,10 @@ class MinifyX implements HookHostInterface
      *   fromCache: bool,
      *   written: bool,
      *   success: bool,
-     *   error: string
+     *   error: string,
+     *   errorCode: string,
+     *   sourceFile: string,
+     *   phase: string
      * }|null
      */
     public function processFiles($files, string $type): ?array
@@ -527,7 +532,11 @@ class MinifyX implements HookHostInterface
 
     public function getTmpDir()
     {
-        $dir = str_replace('//', '/', (string) ($this->config['munee_cache'] ?? ''));
+        $dir = str_replace(
+            '//',
+            '/',
+            (string) ($this->config['minifyx_cache'] ?? '')
+        );
         if ($this->makeDir($dir)) {
             return $dir;
         }
@@ -730,7 +739,8 @@ class MinifyX implements HookHostInterface
     private function logError(string $message): void
     {
         if (method_exists($this->modx, 'log')) {
-            $level = defined('modX::LOG_LEVEL_ERROR') ? constant('modX::LOG_LEVEL_ERROR') : 3;
+            $constant = $this->modx::class . '::LOG_LEVEL_ERROR';
+            $level = defined($constant) ? constant($constant) : 3;
             $this->modx->log($level, $message);
         }
     }

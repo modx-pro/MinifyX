@@ -54,10 +54,11 @@ final class RegisteredAssetsProcessor
                 continue;
             }
 
-            if (preg_match('#<style\b([^>]*)>.*?</style>#is', $tag)) {
+            if (preg_match('#<style\b([^>]*)>.*?</style>#is', $tag, $m)) {
                 $parsed[] = [
                     'raw' => $tag,
                     'kind' => 'raw-css',
+                    'attributes' => $this->parseAttributes($m[1]),
                 ];
                 continue;
             }

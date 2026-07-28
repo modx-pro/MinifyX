@@ -53,7 +53,9 @@ final class SecurityFixesTest extends TestCase
         mkdir($cacheDir, 0755, true);
         $img = imagecreatetruecolor(20, 10);
         imagejpeg($img, $root . 'photo.jpg', 90);
-        imagedestroy($img);
+        if (PHP_VERSION_ID < 80500) {
+            imagedestroy($img);
+        }
 
         $controller = new ImageController(
             new PathGuard($root),

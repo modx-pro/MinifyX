@@ -10,11 +10,17 @@ class ExternalProcessRunner
 {
     private int $timeoutSeconds;
     private int $maxOutputBytes;
+    private int $maxInputBytes;
 
-    public function __construct(int $timeoutSeconds = 30, int $maxOutputBytes = 5_000_000)
+    public function __construct(
+        int $timeoutSeconds = 30,
+        int $maxOutputBytes = 5_000_000,
+        int $maxInputBytes = 5_000_000
+    )
     {
         $this->timeoutSeconds = max(1, $timeoutSeconds);
         $this->maxOutputBytes = max(1024, $maxOutputBytes);
+        $this->maxInputBytes = max(1024, $maxInputBytes);
     }
 
     public function isExecutableAvailable(string $binary): bool
@@ -29,6 +35,7 @@ class ExternalProcessRunner
 
         try {
             $process = new Process([$binary, '--version']);
+            $process->setTimeout($this->timeoutSeconds);
             $process->run();
 
             return $process->isSuccessful();
@@ -42,6 +49,10 @@ class ExternalProcessRunner
      */
     public function run(array $command, string $input = ''): string
     {
+        if (strlen($input) > $this->maxInputBytes) {
+            throw new \RuntimeException('External optimizer input exceeds maximum allowed size.');
+        }
+
         $process = new Process($command);
         $process->setTimeout($this->timeoutSeconds);
         $process->setInput($input);

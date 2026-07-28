@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0-pl] - 2026-07-28
+
+### Added
+- MODX 3 service resolution through the native container when it exposes `minifyx`.
+- Upgrade resolver for renamed image cache and processor settings.
+- SCSS/Sass included-file tracking and source maps for a single unminified input.
+- PHP 8.5 CI coverage and MinifyX 3 migration guidance.
+
+### Changed
+- Minimum runtime is MODX Revolution 3.x with PHP 8.2.
+- Development stack uses PHPUnit 11, PHPStan 2, and phpstan-phpunit 2.
+- `scssphp/scssphp` is now 2.x and `symfony/process` is 6.4 or 7.x.
+- Primary image endpoint is `/assets/components/minifyx/minifyx.php`.
+- Image settings are `minifyx_cache` and `minifyx_imageProcessor`; legacy keys remain read fallbacks for 3.x.
+
+### Removed
+- MODX 2.8 and PHP 7.4 runtime support.
+- Runtime CoffeeScript compiler, autoload bootstrap, and compatibility tests.
+
+### Deprecated
+- `/assets/components/minifyx/munee.php` remains a thin alias and is scheduled for removal in MinifyX 4.0.
+- The MODX `getService()` integration remains as an isolated fallback for one migration cycle.
+
 ## [2.0.0-pl] - 2026-07-27
 
 ### Added
@@ -16,6 +39,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Image endpoint hardening: path whitelist (directory-boundary), pixel/byte/dimension limits, ETag/`304`, HMAC signing enforced when key is set.
 - Characterization, security, and processor PHPUnit suite plus PHPStan level 8 and GitHub Actions CI.
 - System settings `minifyx_connector`, `minifyx_image_signing_key`, `minifyx_image_max_pixels`, `minifyx_image_max_bytes`.
+- Safe registered-asset injection, opt-in bundle SRI, scheme-aware URLs, and connector CORS.
+- Structured build errors, safe debug comments, health-check CLI, signing-key rotation, CSP nonce preservation,
+  external-process input limits, and opt-in image rate limiting.
+- Transitive SCSS/LESS dependency fingerprints, opt-in esbuild module bundling and external JS source maps.
+- Warm-cache CLI with optional bounded parallel workers and deterministic sequential fallback.
+- Dedicated Imagick CI coverage.
 
 ### Changed
 - Platform requirements: MODX 2.8.x+ on PHP 7.4+; MODX 3.x on PHP 8.2+.
@@ -23,7 +52,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Snippet, `minify()`, groups, hooks, and connector URL keep the 1.x public contract in compatibility mode.
 - Cache keys now include source mtimes and post-hook content.
 - Snippet and plugin share `processFiles()` / `processAndSave()` (same cache, hooks, and write gates).
-- Bundled registered assets keep attributes from the first tag only and drop `integrity`/`crossorigin`.
+- Bundled registered assets keep attributes from the first tag only; `integrity`/`crossorigin` are dropped unless `minifyx_bundleIntegrity` is enabled (opt-in SRI for bundles).
+- Compatible registered and raw assets are bundled only when adjacent, preserving execution order.
+- Source maps are published atomically for supported Terser/esbuild paths; PHP, SCSS, LESS, and post-hook output
+  remain explicitly map-free in 2.x.
 
 ### Removed
 - Dependency on Munee and its abandoned transitive packages (`jshrink`, `leafo/scssphp`, `oyejorge/less.php`, `imagine` 0.7, CoffeeScript packager).
@@ -34,9 +66,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Dependencies
 - `matthiasmullie/minify` ^1.3.75
-- `scssphp/scssphp` ^2.0
-- `wikimedia/less.php` ^5.0
-- `intervention/image` ^3.11
+- `scssphp/scssphp` ^1.13 (PHP 7.4+; scssphp 2.x planned for MODX 3 / PHP 8.2+)
+- `wikimedia/less.php` ^4.4
+- `symfony/process` ^5.4 || ^6.0
+- `symfony/polyfill-php80` ^1.31
+- Image processing: native GD (required in CI) and optional Imagick via `munee_imageProcessor`
 
 ### Fixed
 - Sibling-prefix path bypass in PathGuard/FileNormalizer (`/web` vs `/web-backup`).

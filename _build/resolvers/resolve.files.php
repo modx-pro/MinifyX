@@ -31,7 +31,11 @@ if ($object->xpdo) {
 
             $vendorAutoload = MODX_CORE_PATH . 'components/minifyx/vendor/autoload.php';
             if (!is_file($vendorAutoload)) {
-                $modx->log(modX::LOG_LEVEL_ERROR, '[MinifyX] vendor/autoload.php is missing. Reinstall the package or run composer install in core/components/minifyx/.');
+                $modx->log(
+                    $modx::LOG_LEVEL_ERROR,
+                    '[MinifyX] vendor/autoload.php is missing. Reinstall the package or run composer install '
+                    . 'in core/components/minifyx/.'
+                );
             }
 
             $report = [];
@@ -46,7 +50,7 @@ if ($object->xpdo) {
                 }
             }
             if ($report !== []) {
-                $modx->log(modX::LOG_LEVEL_INFO, '[MinifyX] Migration report: ' . implode(', ', $report));
+                $modx->log($modx::LOG_LEVEL_INFO, '[MinifyX] Migration report: ' . implode(', ', $report));
             }
             break;
 

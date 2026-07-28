@@ -24,7 +24,9 @@ final class ImageControllerTest extends TestCase
         mkdir($this->cacheDir, 0755, true);
         $img = imagecreatetruecolor(20, 10);
         imagejpeg($img, $this->root . 'photo.jpg', 90);
-        imagedestroy($img);
+        if (PHP_VERSION_ID < 80500) {
+            imagedestroy($img);
+        }
     }
 
     protected function tearDown(): void

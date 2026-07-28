@@ -6,6 +6,7 @@ namespace MinifyX\Image;
 
 use MinifyX\Cache\AtomicFilesystemCache;
 use MinifyX\Contract\ImageProcessorInterface;
+use MinifyX\Support\SigningKeys;
 
 final class ImageController
 {
@@ -14,20 +15,24 @@ final class ImageController
     private PathGuard $guard;
     private ImageProcessorInterface $processor;
     private AtomicFilesystemCache $cache;
-    private string $signingKey;
+    /** @var list<string> */
+    private array $signingKeys;
     private int $maxDimension;
 
+    /**
+     * @param string|list<string> $signingKeys
+     */
     public function __construct(
         PathGuard $guard,
         ImageProcessorInterface $processor,
         AtomicFilesystemCache $cache,
-        string $signingKey = '',
+        $signingKeys = '',
         int $maxDimension = self::MAX_DIMENSION
     ) {
         $this->guard = $guard;
         $this->processor = $processor;
         $this->cache = $cache;
-        $this->signingKey = $signingKey;
+        $this->signingKeys = SigningKeys::normalize($signingKeys);
         $this->maxDimension = max(1, $maxDimension);
     }
 
@@ -53,7 +58,7 @@ final class ImageController
             }
         }
 
-        if ($this->signingKey !== '' && !$this->isValidSignature($query, $files, $resize)) {
+        if ($this->signingKeys !== [] && !$this->isValidSignature($query, $files, $resize)) {
             return $this->error(403, 'Invalid or missing image signature.');
         }
 
@@ -121,7 +126,9 @@ final class ImageController
 
     public function sign(string $file, string $resize = ''): string
     {
-        return hash_hmac('sha256', $file . '|' . $resize, $this->signingKey);
+        $key = $this->signingKeys[0] ?? '';
+
+        return hash_hmac('sha256', $file . '|' . $resize, $key);
     }
 
     /**
@@ -158,11 +165,18 @@ final class ImageController
     {
         $sigRaw = $query['sig'] ?? '';
         $sig = is_string($sigRaw) ? $sigRaw : '';
-        if ($sig === '' || $this->signingKey === '') {
+        if ($sig === '' || $this->signingKeys === []) {
             return false;
         }
 
-        return hash_equals($this->sign($files, $resize), $sig);
+        foreach ($this->signingKeys as $key) {
+            $expected = hash_hmac('sha256', $files . '|' . $resize, $key);
+            if (hash_equals($expected, $sig)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

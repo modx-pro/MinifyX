@@ -13,22 +13,19 @@ final class BundlePlanner
     public function groupCompatible(array $tags, string $assetType): array
     {
         $groups = [];
-        $order = [];
+        $lastKey = null;
         foreach ($tags as $tag) {
             $key = $tag->getBundleKey($assetType);
-            if (!isset($groups[$key])) {
-                $groups[$key] = [];
-                $order[] = $key;
+            if ($lastKey !== $key || $groups === []) {
+                $groups[] = [$tag];
+                $lastKey = $key;
+                continue;
             }
-            $groups[$key][] = $tag;
+            $lastIndex = array_key_last($groups);
+            $groups[$lastIndex][] = $tag;
         }
 
-        $result = [];
-        foreach ($order as $key) {
-            $result[] = $groups[$key];
-        }
-
-        return $result;
+        return $groups;
     }
 
     /**

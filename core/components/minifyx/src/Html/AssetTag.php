@@ -62,14 +62,14 @@ final class AssetTag
     public function getBundleKey(string $assetType): string
     {
         if ($assetType === 'css') {
-            return 'css|' . $this->getMedia();
+            return 'css|' . $this->getMedia() . '|nonce:' . (string) ($this->attributes['nonce'] ?? '');
         }
 
         $parts = ['js'];
         if ($this->isModuleScript()) {
             $parts[] = 'module';
         }
-        foreach (['defer', 'async', 'nomodule', 'crossorigin', 'referrerpolicy'] as $name) {
+        foreach (['defer', 'async', 'nomodule', 'crossorigin', 'referrerpolicy', 'nonce'] as $name) {
             if (isset($this->attributes[$name])) {
                 $parts[] = $name . ':' . (string) $this->attributes[$name];
             }

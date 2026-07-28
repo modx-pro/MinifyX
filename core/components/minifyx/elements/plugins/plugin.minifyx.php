@@ -1,11 +1,17 @@
 <?php
 
+use MinifyX\Integration\Modx3ServiceResolver;
 use MinifyX\Model\MinifyX;
 use MinifyX\Processor\HtmlMinifier;
 use MinifyX\Processor\ImageRewriter;
+use MinifyX\Processor\RegisteredAssetOutputInjector;
 use MinifyX\Processor\RegisteredAssetPageProcessor;
+use MinifyX\Support\UrlHelper;
 
-$minifyxModelPath = MODX_CORE_PATH . 'components/minifyx/model/minifyx/';
+$autoload = MODX_CORE_PATH . 'components/minifyx/vendor/autoload.php';
+if (is_file($autoload)) {
+    require_once $autoload;
+}
 
 switch ($modx->event->name) {
     case 'OnMODXInit':
@@ -17,11 +23,9 @@ switch ($modx->event->name) {
         break;
 
     case 'OnSiteRefresh':
-        /** @var MinifyX $MinifyX */
-        if ($MinifyX = $modx->getService('minifyx', MinifyX::class, $minifyxModelPath)) {
-            if ($MinifyX->clearCache()) {
-                $modx->log(modX::LOG_LEVEL_INFO, $modx->lexicon('refresh_default') . ': MinifyX');
-            }
+        $MinifyX = Modx3ServiceResolver::resolve($modx);
+        if ($MinifyX instanceof MinifyX && $MinifyX->clearCache()) {
+            $modx->log($modx::LOG_LEVEL_INFO, $modx->lexicon('refresh_default') . ': MinifyX');
         }
         break;
 
@@ -35,11 +39,7 @@ switch ($modx->event->name) {
         }
 
         $time = microtime(true);
-        $autoload = MODX_CORE_PATH . 'components/minifyx/vendor/autoload.php';
-        if (is_file($autoload)) {
-            require_once $autoload;
-        }
-
+        $MinifyX = null;
         if ($processRegistered) {
             $scriptProperties = [
                 'cacheFolder' => $modx->getOption(
@@ -52,33 +52,31 @@ switch ($modx->event->name) {
                 'minifyJs' => $modx->getOption('minifyx_minifyJs', null, false, true),
                 'minifyCss' => $modx->getOption('minifyx_minifyCss', null, false, true),
                 'mangleJs' => $modx->getOption('minifyx_mangleJs', null, false, true),
+                'bundleJsModules' => $modx->getOption('minifyx_bundleJsModules', null, false, true),
+                'sourceMaps' => $modx->getOption('minifyx_sourceMaps', null, false, true),
                 'jsMangler' => $modx->getOption('minifyx_jsMangler', null, 'terser', true),
                 'jsManglerPath' => $modx->getOption('minifyx_jsManglerPath', null, '', true),
+                'esbuildPath' => $modx->getOption('minifyx_esbuildPath', null, '', true),
+                'jsManglerMaxInputBytes' => $modx->getOption(
+                    'minifyx_jsManglerMaxInputBytes',
+                    null,
+                    5000000,
+                    true
+                ),
                 'jsFilename' => $modx->getOption('minifyx_jsFilename', null, 'all', true),
                 'cssFilename' => $modx->getOption('minifyx_cssFilename', null, 'all', true),
             ];
 
-            /** @var MinifyX $MinifyX */
-            if (isset($modx->minifyx) && $modx->minifyx instanceof MinifyX) {
-                $MinifyX = $modx->minifyx;
-                $MinifyX->reset($scriptProperties);
-            } else {
-                $MinifyX = $modx->getService(
-                    'minifyx',
-                    MinifyX::class,
-                    $minifyxModelPath,
-                    $scriptProperties
-                );
-            }
+            $MinifyX = Modx3ServiceResolver::resolve($modx, $scriptProperties);
 
             if (!$MinifyX instanceof MinifyX) {
-                $modx->log(modX::LOG_LEVEL_ERROR, '[MinifyX] Service could not be loaded.');
+                $modx->log($modx::LOG_LEVEL_ERROR, '[MinifyX] Service could not be loaded.');
                 break;
             }
 
             if (!$MinifyX->prepareCacheFolder()) {
                 $cacheDir = (string) ($MinifyX->config['cacheFolderPath'] ?? '');
-                $modx->log(modX::LOG_LEVEL_ERROR, '[MinifyX] Could not create cache dir "' . $cacheDir . '"');
+                $modx->log($modx::LOG_LEVEL_ERROR, '[MinifyX] Could not create cache dir "' . $cacheDir . '"');
                 break;
             }
 
@@ -91,33 +89,50 @@ switch ($modx->event->name) {
                 ? $modx->getRegisteredClientScripts()
                 : '';
 
-            $modx->resource->_output = str_replace(
-                [$startup . "\n</head>", $scripts . "\n</body>"],
-                [implode("\n", $final['head']) . "\n</head>", implode("\n", $final['body']) . "\n</body>"],
-                $modx->resource->_output
+            $modx->resource->_output = (new RegisteredAssetOutputInjector())->inject(
+                (string) $modx->resource->_output,
+                $startup,
+                $scripts,
+                $final['head'],
+                $final['body']
             );
         }
 
         if ($processImages) {
-            if (!$modx->getService('minifyx', MinifyX::class, $minifyxModelPath)) {
+            if (!$MinifyX instanceof MinifyX) {
+                $MinifyX = Modx3ServiceResolver::resolve($modx);
+            }
+            if (!$MinifyX instanceof MinifyX) {
                 break;
             }
 
-            $connector = (string) $modx->getOption(
-                'minifyx_connector',
-                null,
-                '/assets/components/minifyx/munee.php',
-                true
+            $isHttps = UrlHelper::detectHttpsFromServer();
+            $siteUrl = UrlHelper::schemeAwareSiteUrl(
+                (string) $modx->getOption('site_url'),
+                $isHttps
+            );
+            $connector = UrlHelper::absolutize(
+                (string) $modx->getOption(
+                    'minifyx_connector',
+                    null,
+                    '/assets/components/minifyx/minifyx.php',
+                    true
+                ),
+                $siteUrl,
+                $isHttps
             );
             $exclude = (string) $modx->getOption('minifyx_exclude_images', null, '#(thumb|/\d+x\d+/)#i');
             $default = (string) $modx->getOption('minifyx_images_filters', null, '', true);
-            $signingKey = (string) $modx->getOption('minifyx_image_signing_key', null, '', true);
+            $signingKeys = (string) $modx->getOption('minifyx_image_signing_keys', null, '', true);
+            if (trim($signingKeys) === '') {
+                $signingKeys = (string) $modx->getOption('minifyx_image_signing_key', null, '', true);
+            }
             $rewriter = new ImageRewriter(
                 $connector,
-                (string) $modx->getOption('site_url'),
+                $siteUrl,
                 $default,
                 $exclude,
-                $signingKey
+                $signingKeys
             );
             $modx->resource->_output = $rewriter->rewrite((string) $modx->resource->_output);
         }
@@ -128,7 +143,7 @@ switch ($modx->event->name) {
         }
 
         $modx->log(
-            modX::LOG_LEVEL_INFO,
+            $modx::LOG_LEVEL_INFO,
             '[MinifyX] Total time for page "' . $modx->resource->id . '" = ' . (microtime(true) - $time)
         );
         break;

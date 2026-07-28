@@ -1,0 +1,20 @@
+<?php
+
+/**
+ * Example asset groups for the MinifyX snippet.
+ *
+ * Copy to core/components/minifyx/config/groups.php and adjust paths.
+ * Reference groups from the snippet:
+ * &cssGroups=`baseCss,printCss`&jsGroups=`baseJs`
+ */
+return [
+    'baseCss' => [
+        '/assets/css/base.css',
+    ],
+    'printCss' => [
+        '/assets/css/print.css',
+    ],
+    'baseJs' => [
+        '/assets/js/base.js',
+    ],
+];

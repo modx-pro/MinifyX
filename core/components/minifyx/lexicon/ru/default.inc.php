@@ -63,6 +63,8 @@ $_lang['setting_minifyx_cacheFolder_desc']
     . ' будет складывать результаты своей работы.'
     . ' Можно указывать несуществующую директорию -'
     . ' она будет создана автоматически.';
+$_lang['setting_minifyx_cache'] = 'Директория кэша изображений';
+$_lang['setting_minifyx_cache_desc'] = 'Файловая директория кэша image connector MinifyX.';
 
 $_lang['setting_minifyx_processRawJs'] = 'Обрабатывать сырой javascript?';
 $_lang['setting_minifyx_processRawJs_desc']
@@ -83,7 +85,9 @@ $_lang['setting_minifyx_forceDelete_desc']
 $_lang['setting_minifyx_connector'] = 'URL image connector';
 $_lang['setting_minifyx_connector_desc']
     = 'Публичный endpoint для on-the-fly трансформации изображений.'
-    . ' По умолчанию: /assets/components/minifyx/munee.php';
+    . ' По умолчанию: /assets/components/minifyx/minifyx.php';
+$_lang['setting_minifyx_imageProcessor'] = 'Обработчик изображений';
+$_lang['setting_minifyx_imageProcessor_desc'] = 'Backend изображений: GD или Imagick.';
 $_lang['setting_minifyx_image_signing_key'] = 'Ключ подписи URL изображений';
 $_lang['setting_minifyx_image_signing_key_desc']
     = 'HMAC-ключ для URL изображений. Если задан, unsigned'
@@ -97,5 +101,47 @@ $_lang['setting_minifyx_image_max_bytes'] = 'Максимум байт изоб�
 $_lang['setting_minifyx_image_max_bytes_desc']
     = 'Отклонять файлы изображений больше указанного'
     . ' размера в байтах.';
-
-
+$_lang['setting_minifyx_bundleIntegrity'] = 'Subresource integrity для бандлов';
+$_lang['setting_minifyx_bundleIntegrity_desc']
+    = 'Добавлять SHA-384 integrity и crossorigin="anonymous"'
+    . ' к тегам собранных бандлов.';
+$_lang['setting_minifyx_cors_origin'] = 'CORS origin image connector';
+$_lang['setting_minifyx_cors_origin_desc']
+    = 'Необязательное значение Access-Control-Allow-Origin'
+    . ' для image connector. Пустое значение отключает заголовок.';
+$_lang['setting_minifyx_debug'] = 'Безопасные debug-комментарии бандлов';
+$_lang['setting_minifyx_debug_desc']
+    = 'Добавлять HTML-комментарии с типом, числом исходников,'
+    . ' статусом кэша и именем бандла.';
+$_lang['setting_minifyx_image_signing_keys'] = 'Ключи подписи URL изображений';
+$_lang['setting_minifyx_image_signing_keys_desc']
+    = 'HMAC-ключи через запятую или новую строку.'
+    . ' Первый подписывает, все проверяют.';
+$_lang['setting_minifyx_image_rate_limit_max'] = 'Запросов изображений за окно';
+$_lang['setting_minifyx_image_rate_limit_max_desc']
+    = 'Максимум запросов на client hash. 0 отключает лимит.';
+$_lang['setting_minifyx_image_rate_limit_window'] = 'Окно rate limit изображений';
+$_lang['setting_minifyx_image_rate_limit_window_desc'] = 'Длина окна rate limit в секундах.';
+$_lang['setting_minifyx_image_rate_limit_salt'] = 'Salt rate limit изображений';
+$_lang['setting_minifyx_image_rate_limit_salt_desc']
+    = 'Секретный salt для хеширования IP клиента.';
+$_lang['setting_minifyx_jsManglerMaxInputBytes'] = 'Максимальный input JS mangler';
+$_lang['setting_minifyx_jsManglerMaxInputBytes_desc']
+    = 'Отклонять больший JS input до запуска внешнего процесса.';
+$_lang['setting_minifyx_bundleJsModules'] = 'Собирать ES-модули';
+$_lang['setting_minifyx_bundleJsModules_desc']
+    = 'Использовать esbuild --bundle для зарегистрированных'
+    . ' type="module" скриптов.'
+    . ' По умолчанию выключено.';
+$_lang['setting_minifyx_esbuildPath'] = 'Путь к esbuild';
+$_lang['setting_minifyx_esbuildPath_desc']
+    = 'Отдельный путь к esbuild для сборки ES-модулей.'
+    . ' Пустое значение использует PATH.';
+$_lang['setting_minifyx_sourceMaps'] = 'Создавать source maps';
+$_lang['setting_minifyx_sourceMaps_desc']
+    = 'Создавать внешние карты для поддерживаемых Terser/esbuild backend.'
+    . ' По умолчанию выключено.';
+$_lang['setting_minifyx_parallelBuild'] = 'Параллельный прогрев кэша';
+$_lang['setting_minifyx_parallelBuild_desc']
+    = 'Разрешить ограниченный параллелизм процессов в warm-cache CLI.'
+    . ' Web-запросы остаются последовательными.';

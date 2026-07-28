@@ -6,9 +6,9 @@ namespace MinifyX\Tests;
 
 use MinifyX\Image\PathGuard;
 use MinifyX\Processor\CssJsProcessor;
-use MinifyX\Processor\LegacyCoffeeCompiler;
 use MinifyX\Processor\LessCompiler;
 use MinifyX\Processor\ScssCompiler;
+use MinifyX\Processor\UnsupportedSourceTypeException;
 
 final class AssetProcessorsTest extends TestCase
 {
@@ -45,25 +45,49 @@ final class AssetProcessorsTest extends TestCase
         self::assertStringContainsString('body{color:red}', $cssCompact);
     }
 
-    public function testCompileScssLessAndCoffee(): void
+    public function testCompileScssAndLess(): void
     {
         file_put_contents($this->dir . 'a.scss', '$c: #f00; body { color: $c; }');
         file_put_contents($this->dir . 'a.less', '@c: #0f0; body { color: @c; }');
-        file_put_contents($this->dir . 'a.coffee', 'square = (x) -> x * x');
 
         $processor = new CssJsProcessor([
             new ScssCompiler(),
             new LessCompiler(),
-            new LegacyCoffeeCompiler(),
         ]);
 
         $scss = $processor->process([$this->dir . 'a.scss'], ['type' => 'css']);
         $less = $processor->process([$this->dir . 'a.less'], ['type' => 'css']);
-        $coffee = $processor->process([$this->dir . 'a.coffee'], ['type' => 'js']);
 
         self::assertStringContainsString('color: #f00', $scss);
         self::assertStringContainsString('color: #0f0', $less);
-        self::assertStringContainsString('function(x)', $coffee);
+    }
+
+    public function testScssCompileImportAndSourceMap(): void
+    {
+        file_put_contents($this->dir . '_colors.scss', '$accent: #123456;');
+        $path = $this->dir . 'mapped.scss';
+        file_put_contents($path, '@import "colors"; body { color: $accent; }');
+        $compiler = new ScssCompiler();
+        $processor = new CssJsProcessor([$compiler]);
+
+        $css = $processor->process([$path], ['type' => 'css', 'sourceMaps' => true]);
+        $map = $processor->getSourceMap();
+
+        self::assertStringContainsString('#123456', $css);
+        self::assertNotNull($map);
+        self::assertSame(3, json_decode($map, true, 512, JSON_THROW_ON_ERROR)['version']);
+        self::assertContains(realpath($this->dir . '_colors.scss'), $compiler->getIncludedFiles());
+    }
+
+    public function testCoffeeScriptIsUnsupported(): void
+    {
+        $path = $this->dir . 'a.coffee';
+        file_put_contents($path, 'square = (x) -> x * x');
+
+        $this->expectException(UnsupportedSourceTypeException::class);
+        $this->expectExceptionMessage('Precompile');
+
+        (new CssJsProcessor())->process([$path], ['type' => 'js']);
     }
 
     public function testPathGuardBlocksTraversal(): void

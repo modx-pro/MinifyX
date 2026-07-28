@@ -79,7 +79,10 @@ final class AssetTagRenderer
     public function renderBundle(string $assetType, string $url, AssetTag $tag, array $config): array
     {
         $attrs = $tag->getAttributes();
-        unset($attrs['href'], $attrs['src'], $attrs['integrity'], $attrs['crossorigin']);
+        unset($attrs['href'], $attrs['src']);
+        if (empty($config['bundleIntegrity'])) {
+            unset($attrs['integrity'], $attrs['crossorigin']);
+        }
 
         $kind = $assetType === 'css' ? AssetTag::KIND_LINK : AssetTag::KIND_SCRIPT;
         $preloadEnabled = $assetType === 'css'

@@ -186,6 +186,28 @@ final class IssueFixesTest extends TestCase
         self::assertStringNotContainsString('modulepreload', $bundle['tag']);
     }
 
+    public function testBundleIntegrityIsOptIn(): void
+    {
+        $renderer = new AssetTagRenderer();
+        $tag = new AssetTag(
+            AssetTag::KIND_SCRIPT,
+            '/bundle.js',
+            [
+                'integrity' => 'sha384-test',
+                'crossorigin' => 'anonymous',
+                'defer' => true,
+            ]
+        );
+
+        $without = $renderer->renderBundle('js', '/bundle.js', $tag, []);
+        self::assertStringNotContainsString('integrity=', $without['tag']);
+
+        $with = $renderer->renderBundle('js', '/bundle.js', $tag, ['bundleIntegrity' => true]);
+        self::assertStringContainsString('integrity="sha384-test"', $with['tag']);
+        self::assertStringContainsString('crossorigin="anonymous"', $with['tag']);
+        self::assertStringContainsString('defer', $with['tag']);
+    }
+
     private function removeDir(string $dir): void
     {
         if (!is_dir($dir)) {

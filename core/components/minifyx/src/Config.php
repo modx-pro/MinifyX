@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace MinifyX;
 
+use MinifyX\Support\SettingUpgradeResolver;
+
 final class Config
 {
     /** @var array<string, mixed> */
@@ -14,7 +16,7 @@ final class Config
      */
     public function __construct(array $data)
     {
-        $this->data = $data;
+        $this->data = SettingUpgradeResolver::resolve($data);
         $this->syncExtensions();
     }
 
@@ -57,7 +59,7 @@ final class Config
      */
     public function merge(array $values): void
     {
-        $this->data = array_merge($this->data, $values);
+        $this->data = array_merge($this->data, SettingUpgradeResolver::resolve($values));
         $this->syncExtensions();
     }
 

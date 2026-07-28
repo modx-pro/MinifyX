@@ -1,7 +1,8 @@
 <?php
 
 $_lang['minifyx_prop_jsSources']
-    = 'Список JS файлов для обработки. Можно указывать *.js и *.coffee.';
+    = 'Список предварительно скомпилированных *.js файлов'
+    . ' для обработки.';
 $_lang['minifyx_prop_cssSources']
     = 'Список CSS файлов для обработки. Можно указывать *.css, *.less и *.scss.';
 
@@ -53,6 +54,9 @@ $_lang['minifyx_prop_mangleJs']
 $_lang['minifyx_prop_jsMangler'] = 'Backend для JS mangling: terser или esbuild.';
 $_lang['minifyx_prop_jsManglerPath']
     = 'Абсолютный путь к binary terser/esbuild. Пусто — поиск в PATH.';
+$_lang['minifyx_prop_sourceMaps']
+    = 'Создавать внешние source maps,'
+    . ' если выбранный JS backend их поддерживает.';
 $_lang['minifyx_prop_preloadCss']
     = 'Добавлять companion <link rel="preload" as="style">'
     . ' для CSS bundle (opt-in).';

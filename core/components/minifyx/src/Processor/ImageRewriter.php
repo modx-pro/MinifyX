@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace MinifyX\Processor;
 
+use MinifyX\Support\SigningKeys;
+
 /**
  * Rewrites <img> tags in a single pass using offset-based replacements.
  */
@@ -13,20 +15,24 @@ final class ImageRewriter
     private string $siteUrl;
     private string $defaultFilters;
     private string $excludePattern;
-    private string $signingKey;
+    /** @var list<string> */
+    private array $signingKeys;
 
+    /**
+     * @param string|list<string> $signingKeys
+     */
     public function __construct(
         string $connector,
         string $siteUrl,
         string $defaultFilters = 's[true]',
         string $excludePattern = '#(thumb|/\d+x\d+/)#i',
-        string $signingKey = ''
+        $signingKeys = ''
     ) {
         $this->connector = $connector;
         $this->siteUrl = rtrim($siteUrl, '/');
         $this->defaultFilters = $defaultFilters;
         $this->excludePattern = $excludePattern;
-        $this->signingKey = $signingKey;
+        $this->signingKeys = SigningKeys::normalize($signingKeys);
     }
 
     public function rewrite(string $html): string
@@ -102,8 +108,8 @@ final class ImageRewriter
         $resize .= $filters ?? $this->defaultFilters;
 
         $newSrc = $this->connector . '?files=' . rawurlencode($file) . '&resize=' . rawurlencode($resize);
-        if ($this->signingKey !== '') {
-            $sig = hash_hmac('sha256', $file . '|' . $resize, $this->signingKey);
+        if ($this->signingKeys !== []) {
+            $sig = hash_hmac('sha256', $file . '|' . $resize, $this->signingKeys[0]);
             $newSrc .= '&sig=' . rawurlencode($sig);
         }
 
@@ -115,4 +121,5 @@ final class ImageRewriter
 
         return is_string($updated) ? $updated : $tag;
     }
+
 }

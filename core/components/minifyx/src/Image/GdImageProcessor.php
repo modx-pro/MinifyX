@@ -75,13 +75,15 @@ final class GdImageProcessor implements ImageProcessorInterface
         }
 
         if (($dstWidth * $dstHeight) > $this->maxPixels) {
-            imagedestroy($src);
+            $this->destroy($src);
             throw new \RuntimeException('Requested output exceeds maximum allowed pixel count.');
         }
 
+        $dstWidth = max(1, $dstWidth);
+        $dstHeight = max(1, $dstHeight);
         $dst = imagecreatetruecolor($dstWidth, $dstHeight);
         if ($dst === false) {
-            imagedestroy($src);
+            $this->destroy($src);
             throw new \RuntimeException('Unable to allocate image buffer.');
         }
 
@@ -95,7 +97,7 @@ final class GdImageProcessor implements ImageProcessorInterface
         }
 
         imagecopyresampled($dst, $src, 0, 0, 0, 0, $dstWidth, $dstHeight, $srcWidth, $srcHeight);
-        imagedestroy($src);
+        $this->destroy($src);
 
         $filters = (string) ($options['filters'] ?? '');
         if (str_contains($filters, 's[true]') || str_contains($filters, 'sharpen')) {
@@ -175,12 +177,19 @@ final class GdImageProcessor implements ImageProcessorInterface
                 $ok = imagejpeg($image, null, 90);
         }
 
-        imagedestroy($image);
+        $this->destroy($image);
         $body = (string) ob_get_clean();
         if (!$ok || $body === '') {
             throw new \RuntimeException('Unable to encode image for ' . basename($sourcePath) . '.');
         }
 
         return $body;
+    }
+
+    private function destroy(\GdImage $image): void
+    {
+        if (PHP_VERSION_ID < 80500) {
+            imagedestroy($image);
+        }
     }
 }

@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace MinifyX\Optimization;
 
 use MinifyX\Contract\JsOptimizerInterface;
+use MinifyX\Contract\SourceMapProviderInterface;
 
-final class TerserJsOptimizer implements JsOptimizerInterface
+final class TerserJsOptimizer implements JsOptimizerInterface, SourceMapProviderInterface
 {
     private ExternalProcessRunner $runner;
+    private bool $sourceMaps = false;
+    private ?string $sourceMap = null;
 
     public function __construct(?ExternalProcessRunner $runner = null)
     {
@@ -36,13 +39,31 @@ final class TerserJsOptimizer implements JsOptimizerInterface
         }
         $command[] = '--comments';
         $command[] = '/^!/';
+        if ($this->sourceMaps) {
+            $command[] = '--source-map';
+            $command[] = 'url=inline';
+        }
 
-        return $this->runner->run($command, $combined);
+        $result = InlineSourceMap::extract($this->runner->run($command, $combined));
+        $this->sourceMap = $result['map'];
+
+        return $result['code'];
     }
 
     public function getBackendId(): string
     {
         return 'terser';
+    }
+
+    public function setSourceMaps(bool $sourceMaps): void
+    {
+        $this->sourceMaps = $sourceMaps;
+        $this->sourceMap = null;
+    }
+
+    public function getSourceMap(): ?string
+    {
+        return $this->sourceMap;
     }
 
     private function resolveBinary(string $jsMangler, string $jsManglerPath, string $defaultName): ?string
