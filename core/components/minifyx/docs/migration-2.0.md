@@ -16,7 +16,10 @@
 
 ## What changed
 
-- Asset processing is pure PHP (`matthiasmullie/minify`, `scssphp`, `wikimedia/less.php`, Intervention Image).
+- Asset processing is pure PHP (`matthiasmullie/minify`, `scssphp`, `wikimedia/less.php`, native GD/Imagick).
+- Optional JS mangling via Terser or esbuild (`mangleJs`, `jsMangler`, `jsManglerPath`). Falls back to PHP minifier only when the binary is missing.
+- Optional preload hints for bundled CSS/JS (`preloadCss`, `preloadJs`).
+- CSS minifier preserves empty `url()` values and rebases relative URLs for cache output paths.
 - Cache files are invalidated by source mtime fingerprint, not only output hash.
 - Registered asset rewriting keeps attributes such as `defer`, `async`, `type="module"`, `integrity`, `media`.
 - HTML minify preserves `pre`, `textarea`, script/style blocks and conditional comments.

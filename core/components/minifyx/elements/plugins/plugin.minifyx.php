@@ -2,7 +2,7 @@
 
 use MinifyX\Processor\HtmlMinifier;
 use MinifyX\Processor\ImageRewriter;
-use MinifyX\Processor\RegisteredAssetsProcessor;
+use MinifyX\Processor\RegisteredAssetPageProcessor;
 
 switch ($modx->event->name) {
     case 'OnMODXInit':
@@ -37,54 +37,14 @@ switch ($modx->event->name) {
         }
 
         if ($processRegistered) {
-            $current = [
-                'head' => $modx->sjscripts ?? [],
-                'body' => $modx->jscripts ?? [],
-            ];
-            $included = $excluded = $prepared = $raw = [
-                'head' => ['css' => [], 'js' => [], 'html' => []],
-                'body' => ['css' => [], 'js' => [], 'html' => []],
-            ];
-            $exclude = (string) $modx->getOption('minifyx_exclude_registered', null, '');
-            $parser = new RegisteredAssetsProcessor();
-
-            foreach ($current as $key => $value) {
-                foreach ($parser->parseTags((array) $value) as $item) {
-                    if ($item['kind'] === 'link' || ($item['kind'] === 'script' && isset($item['url']))) {
-                        $url = (string) ($item['url'] ?? '');
-                        $isCss = $parser->isCssUrl($url);
-                        $isJs = $parser->isJsUrl($url);
-                        $bucket = $isCss ? 'css' : ($isJs ? 'js' : null);
-                        if ($bucket === null) {
-                            $excluded[$key]['html'][] = $item['raw'];
-                            continue;
-                        }
-                        if ($exclude !== '' && @preg_match($exclude, $url) === 1) {
-                            $excluded[$key][$bucket][] = $item;
-                        } else {
-                            $included[$key][$bucket][] = $item;
-                        }
-                        continue;
-                    }
-
-                    if ($item['kind'] === 'raw-js') {
-                        $raw[$key]['js'][] = $item['raw'];
-                        continue;
-                    }
-                    if ($item['kind'] === 'raw-css') {
-                        $raw[$key]['css'][] = $item['raw'];
-                        continue;
-                    }
-
-                    $excluded[$key]['html'][] = $item['raw'];
-                }
-            }
-
             $scriptProperties = [
                 'cacheFolder' => $modx->getOption('minifyx_cacheFolder', null, '/assets/components/minifyx/cache/', true),
                 'forceUpdate' => $modx->getOption('minifyx_forceUpdate', null, false, true),
                 'minifyJs' => $modx->getOption('minifyx_minifyJs', null, false, true),
                 'minifyCss' => $modx->getOption('minifyx_minifyCss', null, false, true),
+                'mangleJs' => $modx->getOption('minifyx_mangleJs', null, false, true),
+                'jsMangler' => $modx->getOption('minifyx_jsMangler', null, 'terser', true),
+                'jsManglerPath' => $modx->getOption('minifyx_jsManglerPath', null, '', true),
                 'jsFilename' => $modx->getOption('minifyx_jsFilename', null, 'all', true),
                 'cssFilename' => $modx->getOption('minifyx_cssFilename', null, 'all', true),
             ];
@@ -102,93 +62,7 @@ switch ($modx->event->name) {
                 break;
             }
 
-            $tmpDir = $MinifyX->getTmpDir() . 'resources/' . $modx->resource->id . '/';
-            foreach ($raw as $key => $value) {
-                foreach ($value as $type => $rows) {
-                    $processRaw = ($type === 'css' && $modx->getOption('minifyx_processRawCss', null, false, true))
-                        || ($type === 'js' && $modx->getOption('minifyx_processRawJs', null, false, true));
-                    if (!$processRaw || $rows === []) {
-                        continue;
-                    }
-
-                    $tmp = '';
-                    foreach ($rows as $text) {
-                        $text = preg_replace('#^<(script|style)\b[^>]*>#i', '', $text) ?? $text;
-                        $text = preg_replace('#</(script|style)>$#i', '', $text) ?? $text;
-                        $tmp .= $text;
-                    }
-                    if ($tmp === '') {
-                        continue;
-                    }
-
-                    $file = sha1($tmp) . '.' . $type;
-                    $absolute = $tmpDir . $file;
-                    if (!is_file($absolute)) {
-                        $MinifyX->makeDir($tmpDir);
-                        $tmpFile = $absolute . '.' . bin2hex(random_bytes(4)) . '.tmp';
-                        file_put_contents($tmpFile, $tmp, LOCK_EX);
-                        rename($tmpFile, $absolute);
-                    }
-                    $included[$key][$type][] = [
-                        'raw' => '',
-                        'kind' => $type === 'css' ? 'link' : 'script',
-                        'url' => $absolute,
-                        'attributes' => [],
-                    ];
-                    $raw[$key][$type] = [];
-                }
-            }
-
-            foreach ($included as $key => $value) {
-                foreach ($value as $type => $items) {
-                    if ($items === []) {
-                        continue;
-                    }
-                    $files = [];
-                    foreach ($items as $item) {
-                        $files[] = is_array($item) ? (string) ($item['url'] ?? '') : (string) $item;
-                    }
-                    $files = array_values(array_filter($files));
-                    if ($files === []) {
-                        continue;
-                    }
-
-                    $result = $MinifyX->processFiles($files, $type);
-                    if ($result !== null && $result['filename'] !== '') {
-                        $prepared[$key][$type][] = [
-                            'url' => $result['url'],
-                            'attributes' => $parser->bundleAttributes($items),
-                            'kind' => $type === 'css' ? 'link' : 'script',
-                        ];
-                    }
-                }
-            }
-
-            $final = ['head' => [], 'body' => []];
-            foreach (['head', 'body'] as $section) {
-                foreach (['css', 'js'] as $type) {
-                    foreach ($excluded[$section][$type] as $item) {
-                        if (is_array($item)) {
-                            $final[$section][] = $item['raw'];
-                        } else {
-                            $final[$section][] = (string) $item;
-                        }
-                    }
-                    foreach ($prepared[$section][$type] as $item) {
-                        $final[$section][] = $parser->buildTag(
-                            (string) $item['kind'],
-                            (string) $item['url'],
-                            (array) ($item['attributes'] ?? [])
-                        );
-                    }
-                    foreach ($raw[$section][$type] as $item) {
-                        $final[$section][] = $item;
-                    }
-                }
-                foreach ($excluded[$section]['html'] as $html) {
-                    $final[$section][] = $html;
-                }
-            }
+            $final = (new RegisteredAssetPageProcessor())->process($modx, $MinifyX);
 
             $startup = method_exists($modx, 'getRegisteredClientStartupScripts')
                 ? $modx->getRegisteredClientStartupScripts()

@@ -8,6 +8,7 @@ use MinifyX\Adapter\LegacyModxAdapter;
 use MinifyX\Cache\AtomicFilesystemCache;
 use MinifyX\Contract\ModxAdapterInterface;
 use MinifyX\Hook\HookRunner;
+use MinifyX\Optimization\FallbackJsOptimizer;
 use MinifyX\Pipeline\AssetPipeline;
 use MinifyX\Pipeline\FileNormalizer;
 use MinifyX\Processor\CssJsProcessor;
@@ -38,14 +39,18 @@ final class ServiceFactory
         $config->set('cacheFolderPath', $cache->getDirectory());
 
         $logger = static function (string $message) use ($modx): void {
-            $modx->log(2, '[MinifyX] ' . $message);
+            $modx->log(2, $message);
         };
 
-        $processor = new CssJsProcessor([
-            new ScssCompiler(),
-            new LessCompiler(),
-            new LegacyCoffeeCompiler($logger),
-        ]);
+        $processor = new CssJsProcessor(
+            [
+                new ScssCompiler(),
+                new LessCompiler(),
+                new LegacyCoffeeCompiler($logger),
+            ],
+            null,
+            new FallbackJsOptimizer($logger)
+        );
 
         $normalizer = new FileNormalizer($modx->getBasePath(), $modx->getSiteUrl());
         $hooks = new HookRunner($modx, (string) $config->get('hooksPath'));
@@ -77,6 +82,13 @@ final class ServiceFactory
             'jsFilename' => 'scripts',
             'minifyJs' => false,
             'minifyCss' => false,
+            'mangleJs' => false,
+            'jsMangler' => 'terser',
+            'jsManglerPath' => '',
+            'preloadCss' => false,
+            'preloadJs' => false,
+            'cssPreloadTpl' => '',
+            'jsPreloadTpl' => '',
             'registerCss' => 'default',
             'registerJs' => 'default',
             'jsPlaceholder' => 'MinifyX.javascript',

@@ -11,7 +11,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: ['8.2', '8.3', '8.4']
+        include:
+          - php: '7.4'
+            composer-flags: '--prefer-lowest'
+          - php: '8.2'
+            composer-flags: ''
+          - php: '8.3'
+            composer-flags: ''
+          - php: '8.4'
+            composer-flags: ''
     defaults:
       run:
         working-directory: core/components/minifyx
@@ -23,8 +31,10 @@ jobs:
           php-version: ${{ matrix.php }}
           extensions: gd, mbstring, json
           coverage: none
+      - name: Validate PHP syntax
+        run: find src model -name '*.php' -print0 | xargs -0 -n1 php -l
       - name: Install dependencies
-        run: composer install --no-interaction --prefer-dist
+        run: composer update --no-interaction --prefer-dist ${{ matrix.composer-flags }}
       - name: PHPUnit
         run: composer test
       - name: PHPStan

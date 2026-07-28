@@ -6,7 +6,7 @@ namespace MinifyX\Tests;
 
 use MinifyX\Cache\AtomicFilesystemCache;
 use MinifyX\Image\ImageController;
-use MinifyX\Image\InterventionImageProcessor;
+use MinifyX\Image\ImageProcessorFactory;
 use MinifyX\Image\PathGuard;
 use MinifyX\Support\PathHelper;
 use PHPUnit\Framework\TestCase;
@@ -58,7 +58,7 @@ final class SecurityFixesTest extends TestCase
 
         $controller = new ImageController(
             new PathGuard($root),
-            new InterventionImageProcessor('GD', 1_000_000, 5_000_000, 4096),
+            ImageProcessorFactory::create('GD', 1_000_000, 5_000_000, 4096),
             new AtomicFilesystemCache($cacheDir),
             'secret-key',
             4096

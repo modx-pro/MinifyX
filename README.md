@@ -18,7 +18,7 @@ Version **2.0** replaces Munee with a pure-PHP pipeline. Snippet parameters, `mi
 | Snippet `MinifyX` | Explicit CSS/JS groups and sources |
 | `minify()` | Same API from PHP after `OnMODXInit` |
 | Plugin | Opt-in: registered assets, images, HTML minify |
-| `/assets/components/minifyx/munee.php` | Image connector (compatibility path; backend is Intervention Image) |
+| `/assets/components/minifyx/munee.php` | Image connector (GD/Imagick backend) |
 
 Enable plugin modes with system settings: `minifyx_process_registered`, `minifyx_process_images`, `minifyx_minifyHtml`.
 
@@ -27,7 +27,7 @@ Enable plugin modes with system settings: `minifyx_process_registered`, `minifyx
 - CSS/JS: [matthiasmullie/minify](https://github.com/matthiasmullie/minify)
 - SCSS: [scssphp/scssphp](https://github.com/scssphp/scssphp)
 - LESS: [wikimedia/less.php](https://github.com/wikimedia/less.php)
-- Images: [intervention/image](https://github.com/Intervention/image) 3.x
+- Images: native GD / optional Imagick via `ImageProcessorFactory`
 
 CoffeeScript uses a deprecated legacy adapter. Precompile to `.js` before MinifyX 3.0.
 

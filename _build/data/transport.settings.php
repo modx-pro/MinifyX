@@ -82,6 +82,38 @@ $tmp = [
         'xtype' => 'numberfield',
         'value' => 20000000,
     ],
+    'mangleJs' => [
+        'xtype' => 'combo-boolean',
+        'value' => false,
+    ],
+    'jsMangler' => [
+        'xtype' => 'list',
+        'value' => 'terser',
+        'options' => [
+            ['text' => 'Terser', 'value' => 'terser'],
+            ['text' => 'esbuild', 'value' => 'esbuild'],
+        ],
+    ],
+    'jsManglerPath' => [
+        'xtype' => 'textfield',
+        'value' => '',
+    ],
+    'preloadCss' => [
+        'xtype' => 'combo-boolean',
+        'value' => false,
+    ],
+    'preloadJs' => [
+        'xtype' => 'combo-boolean',
+        'value' => false,
+    ],
+    'cssPreloadTpl' => [
+        'xtype' => 'textfield',
+        'value' => '',
+    ],
+    'jsPreloadTpl' => [
+        'xtype' => 'textfield',
+        'value' => '',
+    ],
 ];
 
 foreach ($tmp as $k => $v) {

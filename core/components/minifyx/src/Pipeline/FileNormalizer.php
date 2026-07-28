@@ -24,7 +24,7 @@ final class FileNormalizer
      * @param array<int, string>|string $files
      * @return array{paths: list<string>, queryParams: array<string, string>}
      */
-    public function normalize(array|string $files): array
+    public function normalize($files): array
     {
         if (is_string($files)) {
             $files = array_map('trim', explode(',', $files));

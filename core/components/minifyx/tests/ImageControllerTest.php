@@ -6,7 +6,7 @@ namespace MinifyX\Tests;
 
 use MinifyX\Cache\AtomicFilesystemCache;
 use MinifyX\Image\ImageController;
-use MinifyX\Image\InterventionImageProcessor;
+use MinifyX\Image\ImageProcessorFactory;
 use MinifyX\Image\PathGuard;
 use PHPUnit\Framework\TestCase;
 
@@ -42,7 +42,7 @@ final class ImageControllerTest extends TestCase
     {
         $controller = new ImageController(
             new PathGuard($this->root),
-            new InterventionImageProcessor('GD', 1_000_000, 5_000_000),
+            ImageProcessorFactory::create('GD', 1_000_000, 5_000_000),
             new AtomicFilesystemCache($this->cacheDir)
         );
 
@@ -64,7 +64,7 @@ final class ImageControllerTest extends TestCase
     {
         $controller = new ImageController(
             new PathGuard($this->root),
-            new InterventionImageProcessor('GD', 50, 5_000_000),
+            ImageProcessorFactory::create('GD', 50, 5_000_000),
             new AtomicFilesystemCache($this->cacheDir)
         );
         $result = $controller->handle([

@@ -3,7 +3,6 @@
     xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
     bootstrap="tests/bootstrap.php"
     colors="true"
-    cacheDirectory=".phpunit.cache"
     failOnRisky="true"
     failOnWarning="true">
     <testsuites>
@@ -11,10 +10,4 @@
             <directory>tests</directory>
         </testsuite>
     </testsuites>
-    <source>
-        <include>
-            <directory>src</directory>
-            <file>model/minifyx/minifyx.class.php</file>
-        </include>
-    </source>
 </phpunit>

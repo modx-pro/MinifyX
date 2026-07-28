@@ -27,7 +27,11 @@ final class Config
         return new self(array_merge($defaults, $overrides));
     }
 
-    public function get(string $key, mixed $default = null): mixed
+    /**
+     * @param mixed $default
+     * @return mixed
+     */
+    public function get(string $key, $default = null)
     {
         return $this->data[$key] ?? $default;
     }
@@ -37,10 +41,13 @@ final class Config
         return array_key_exists($key, $this->data);
     }
 
-    public function set(string $key, mixed $value): void
+    /**
+     * @param mixed $value
+     */
+    public function set(string $key, $value): void
     {
         $this->data[$key] = $value;
-        if (in_array($key, ['minifyJs', 'minifyCss'], true)) {
+        if (in_array($key, ['minifyJs', 'minifyCss', 'mangleJs'], true)) {
             $this->syncExtensions();
         }
     }
@@ -64,7 +71,7 @@ final class Config
 
     public function syncExtensions(): void
     {
-        $this->data['jsExt'] = !empty($this->data['minifyJs']) ? '.min.js' : '.js';
+        $this->data['jsExt'] = !empty($this->data['minifyJs']) || !empty($this->data['mangleJs']) ? '.min.js' : '.js';
         $this->data['cssExt'] = !empty($this->data['minifyCss']) ? '.min.css' : '.css';
     }
 }

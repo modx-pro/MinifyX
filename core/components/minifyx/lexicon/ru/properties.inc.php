@@ -22,3 +22,11 @@ $_lang['minifyx_prop_hooks'] = 'Список хуков через запяту�
 $_lang['minifyx_prop_cssTpl'] = 'Шаблон для файла стилей. Должен быть указан плейсхолдер [[+file]].';
 $_lang['minifyx_prop_jsTpl'] = 'Шаблон для файла скриптов. Должен быть указан плейсхолдер [[+file]].';
 $_lang['minifyx_prop_version'] = "Версия файла. Добавляется к линку. Укажите любое значение, или '' для отключения, 'auto' для генерирования хэша.";
+
+$_lang['minifyx_prop_mangleJs'] = 'Включить mangling идентификаторов JS через внешний оптимизатор (Terser или esbuild). При недоступном binary используется PHP minifier.';
+$_lang['minifyx_prop_jsMangler'] = 'Backend для JS mangling: terser или esbuild.';
+$_lang['minifyx_prop_jsManglerPath'] = 'Абсолютный путь к binary terser/esbuild. Пусто — поиск в PATH.';
+$_lang['minifyx_prop_preloadCss'] = 'Добавлять companion <link rel="preload" as="style"> для CSS bundle (opt-in).';
+$_lang['minifyx_prop_preloadJs'] = 'Добавлять companion preload/modulepreload для JS bundle в head (opt-in).';
+$_lang['minifyx_prop_cssPreloadTpl'] = 'Шаблон CSS preload. Обязателен плейсхолдер [[+file]].';
+$_lang['minifyx_prop_jsPreloadTpl'] = 'Шаблон JS preload. Обязателен плейсхолдер [[+file]].';

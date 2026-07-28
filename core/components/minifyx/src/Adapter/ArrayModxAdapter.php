@@ -54,7 +54,7 @@ final class ArrayModxAdapter implements ModxAdapterInterface
         $this->resourceId = $resourceId;
     }
 
-    public function getOption(string $key, mixed $options = null, mixed $default = null, bool $skipEmpty = false): mixed
+    public function getOption(string $key, $options = null, $default = null, bool $skipEmpty = false)
     {
         if (is_array($options) && array_key_exists($key, $options)) {
             $value = $options[$key];
@@ -69,7 +69,10 @@ final class ArrayModxAdapter implements ModxAdapterInterface
         return $value;
     }
 
-    public function setOption(string $key, mixed $value): void
+    /**
+     * @param mixed $value
+     */
+    public function setOption(string $key, $value): void
     {
         $this->options[$key] = $value;
     }
@@ -121,7 +124,7 @@ final class ArrayModxAdapter implements ModxAdapterInterface
     /**
      * @param array<string, mixed> $properties
      */
-    public function runSnippet(string $name, array $properties = []): mixed
+    public function runSnippet(string $name, array $properties = [])
     {
         return null;
     }

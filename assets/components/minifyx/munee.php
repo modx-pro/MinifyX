@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 use MinifyX\Cache\AtomicFilesystemCache;
 use MinifyX\Image\ImageController;
-use MinifyX\Image\InterventionImageProcessor;
+use MinifyX\Image\ImageProcessorFactory;
 use MinifyX\Image\PathGuard;
 
 if (!defined('MODX_API_MODE')) {
@@ -60,7 +60,7 @@ $maxBytes = (int) $modx->getOption('minifyx_image_max_bytes', null, 20000000, tr
 
 $controller = new ImageController(
     new PathGuard(MODX_BASE_PATH),
-    new InterventionImageProcessor($driver, $maxPixels, $maxBytes),
+    ImageProcessorFactory::create($driver, $maxPixels, $maxBytes),
     $cache,
     $signingKey
 );

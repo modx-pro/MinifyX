@@ -33,7 +33,7 @@ final class FakeModx
         ];
     }
 
-    public function getOption(string $key, mixed $options = null, mixed $default = null, bool $skipEmpty = false): mixed
+    public function getOption(string $key, $options = null, $default = null, bool $skipEmpty = false)
     {
         if (is_array($options) && array_key_exists($key, $options)) {
             return $options[$key];
@@ -77,7 +77,7 @@ final class FakeModx
         $this->startup[] = $tag;
     }
 
-    public function runSnippet(string $name, array $properties = []): mixed
+    public function runSnippet(string $name, array $properties = [])
     {
         return null;
     }

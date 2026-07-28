@@ -5,3 +5,10 @@ parameters:
     excludePaths:
         - src/Legacy/CoffeeScript
     treatPhpDocTypesAsCertain: false
+    ignoreErrors:
+        -
+            message: '#expects GdImage#'
+            path: src/Image/GdImageProcessor.php
+        -
+            message: '#never returns resource#'
+            path: src/Image/GdImageProcessor.php

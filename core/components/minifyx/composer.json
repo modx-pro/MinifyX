@@ -4,18 +4,19 @@
     "type": "library",
     "license": "MIT",
     "require": {
-        "php": "^8.2",
+        "php": "^7.4 || ^8.0",
         "ext-json": "*",
         "ext-mbstring": "*",
         "ext-pcre": "*",
         "matthiasmullie/minify": "^1.3.75",
-        "scssphp/scssphp": "^2.0",
-        "wikimedia/less.php": "^5.0",
-        "intervention/image": "^3.11"
+        "scssphp/scssphp": "^1.13",
+        "symfony/polyfill-php80": "^1.31",
+        "symfony/process": "^5.4 || ^6.0",
+        "wikimedia/less.php": "^4.4"
     },
     "require-dev": {
-        "phpunit/phpunit": "^11.5",
-        "phpstan/phpstan": "^2.1"
+        "phpstan/phpstan": "^1.12",
+        "phpunit/phpunit": "^9.6"
     },
     "suggest": {
         "ext-gd": "Required for image processing with the GD driver",

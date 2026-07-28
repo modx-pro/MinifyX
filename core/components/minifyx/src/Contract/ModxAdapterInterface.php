@@ -6,7 +6,12 @@ namespace MinifyX\Contract;
 
 interface ModxAdapterInterface
 {
-    public function getOption(string $key, mixed $options = null, mixed $default = null, bool $skipEmpty = false): mixed;
+    /**
+     * @param mixed $options
+     * @param mixed $default
+     * @return mixed
+     */
+    public function getOption(string $key, $options = null, $default = null, bool $skipEmpty = false);
 
     public function getContextKey(): string;
 
@@ -24,8 +29,9 @@ interface ModxAdapterInterface
 
     /**
      * @param array<string, mixed> $properties
+     * @return mixed
      */
-    public function runSnippet(string $name, array $properties = []): mixed;
+    public function runSnippet(string $name, array $properties = []);
 
     public function getResourceId(): ?int;
 

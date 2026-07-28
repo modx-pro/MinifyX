@@ -1,5 +1,7 @@
 <?php
 
+use MinifyX\Html\AssetTag;
+use MinifyX\Html\AssetTagRenderer;
 use MinifyX\Pipeline\AssetPipeline;
 use MinifyX\ServiceFactory;
 use MinifyX\Contract\HookHostInterface;
@@ -79,7 +81,7 @@ class MinifyX implements HookHostInterface
         }
         $this->setConfig($config);
         $this->processParams();
-        $this->config['jsExt'] = !empty($this->config['minifyJs']) ? '.min.js' : '.js';
+        $this->config['jsExt'] = !empty($this->config['minifyJs']) || !empty($this->config['mangleJs']) ? '.min.js' : '.js';
         $this->config['cssExt'] = !empty($this->config['minifyCss']) ? '.min.css' : '.css';
         $this->syncPipelineConfig();
     }
@@ -314,7 +316,7 @@ class MinifyX implements HookHostInterface
      *   error: string
      * }|null
      */
-    public function processFiles(array|string $files, string $type): ?array
+    public function processFiles($files, string $type): ?array
     {
         $this->syncPipelineConfig();
         $this->_filetype = $type;
@@ -554,6 +556,7 @@ class MinifyX implements HookHostInterface
     {
         $sources = $this->prepareSources();
         $output = [];
+        $renderer = new AssetTagRenderer();
 
         foreach ($sources as $type => $value) {
             if (empty($value)) {
@@ -584,27 +587,41 @@ class MinifyX implements HookHostInterface
             }
 
             $link = $result['url'] . (!empty($this->config['version']) ? $this->getVersion() : '');
-            $tag = str_replace(
-                '[[+file]]',
-                $link,
-                $type === 'css' ? (string) $this->config['cssTpl'] : (string) $this->config['jsTpl']
+            $assetTag = new AssetTag(
+                $type === 'css' ? AssetTag::KIND_LINK : AssetTag::KIND_SCRIPT,
+                $link
             );
+            $bundle = $renderer->renderBundle($type, $link, $assetTag, $this->config);
+            $tag = $bundle['tag'];
+            $preload = $bundle['preload'];
 
             switch ($register) {
                 case 'placeholder':
                     if ($placeholder !== '' && method_exists($this->modx, 'setPlaceholder')) {
                         $this->modx->setPlaceholder($placeholder, $tag);
                     }
+                    if ($preload !== null && method_exists($this->modx, 'setPlaceholder')) {
+                        $this->modx->setPlaceholder($placeholder . '.preload', $preload);
+                    }
                     break;
                 case 'print':
+                    if ($preload !== null) {
+                        $output[] = $preload;
+                    }
                     $output[] = $tag;
                     break;
                 case 'startup':
+                    if ($preload !== null && method_exists($this->modx, 'regClientStartupScript')) {
+                        $this->modx->regClientStartupScript($preload);
+                    }
                     if ($type === 'js' && method_exists($this->modx, 'regClientStartupScript')) {
                         $this->modx->regClientStartupScript($tag);
                     }
                     break;
                 default:
+                    if ($preload !== null && method_exists($this->modx, 'regClientStartupScript')) {
+                        $this->modx->regClientStartupScript($preload);
+                    }
                     if ($type === 'css' && method_exists($this->modx, 'regClientCSS')) {
                         $this->modx->regClientCSS($tag);
                     } elseif (method_exists($this->modx, 'regClientScript')) {

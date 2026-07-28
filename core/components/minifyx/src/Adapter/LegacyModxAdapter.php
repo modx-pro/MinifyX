@@ -24,7 +24,7 @@ final class LegacyModxAdapter implements ModxAdapterInterface
         return $this->modx;
     }
 
-    public function getOption(string $key, mixed $options = null, mixed $default = null, bool $skipEmpty = false): mixed
+    public function getOption(string $key, $options = null, $default = null, bool $skipEmpty = false)
     {
         if (method_exists($this->modx, 'getOption')) {
             return $this->modx->getOption($key, $options, $default, $skipEmpty);
@@ -96,7 +96,7 @@ final class LegacyModxAdapter implements ModxAdapterInterface
     /**
      * @param array<string, mixed> $properties
      */
-    public function runSnippet(string $name, array $properties = []): mixed
+    public function runSnippet(string $name, array $properties = [])
     {
         if (method_exists($this->modx, 'runSnippet')) {
             return $this->modx->runSnippet($name, $properties);

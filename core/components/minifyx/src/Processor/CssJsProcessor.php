@@ -4,28 +4,44 @@ declare(strict_types=1);
 
 namespace MinifyX\Processor;
 
-use MatthiasMullie\Minify\CSS;
-use MatthiasMullie\Minify\JS;
 use MinifyX\Contract\AssetProcessorInterface;
+use MinifyX\Contract\CssOptimizerInterface;
+use MinifyX\Contract\JsOptimizerInterface;
 use MinifyX\Contract\SourceCompilerInterface;
+use MinifyX\Optimization\FallbackJsOptimizer;
+use MinifyX\Optimization\MatthiasCssOptimizer;
 
 final class CssJsProcessor implements AssetProcessorInterface
 {
     /** @var list<SourceCompilerInterface> */
     private array $compilers;
 
+    private CssOptimizerInterface $cssOptimizer;
+
+    private JsOptimizerInterface $jsOptimizer;
+
     /**
      * @param list<SourceCompilerInterface> $compilers
      */
-    public function __construct(array $compilers = [])
-    {
+    public function __construct(
+        array $compilers = [],
+        ?CssOptimizerInterface $cssOptimizer = null,
+        ?JsOptimizerInterface $jsOptimizer = null
+    ) {
         $this->compilers = $compilers;
+        $this->cssOptimizer = $cssOptimizer ?? new MatthiasCssOptimizer();
+        $this->jsOptimizer = $jsOptimizer ?? new FallbackJsOptimizer();
     }
 
     public function process(array $absolutePaths, array $options = []): string
     {
-        $type = $options['type'] ?? $this->detectType($absolutePaths);
-        $minify = (bool) ($options['minify'] ?? false);
+        $type = isset($options['type']) ? (string) $options['type'] : $this->detectType($absolutePaths);
+        $minify = !empty($options['minify']);
+        $mangle = !empty($options['mangleJs']);
+        $jsMangler = isset($options['jsMangler']) ? (string) $options['jsMangler'] : 'terser';
+        $jsManglerPath = isset($options['jsManglerPath']) ? (string) $options['jsManglerPath'] : '';
+        $outputPath = isset($options['outputPath']) ? (string) $options['outputPath'] : '';
+
         /** @var array<string, string> $variables */
         $variables = [];
         if (isset($options['queryParams']) && is_array($options['queryParams'])) {
@@ -35,33 +51,35 @@ final class CssJsProcessor implements AssetProcessorInterface
                 }
             }
         }
-        $parts = [];
 
+        $parts = [];
+        $cssSourcePaths = [];
         foreach ($absolutePaths as $path) {
             if (!is_file($path)) {
                 throw new \RuntimeException(sprintf('Asset file not found: %s', $path));
             }
             $source = (string) file_get_contents($path);
             $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+            if ($ext === 'css') {
+                $cssSourcePaths[] = $path;
+            }
             $parts[] = $this->compileIfNeeded($path, $source, $ext, $variables);
         }
 
         $combined = implode("\n", $parts);
-        if (!$minify) {
+        if (!$minify && !$mangle) {
             return $combined;
         }
 
         if ($type === 'css') {
-            $minifier = new CSS();
-            $minifier->add($combined);
-
-            return $minifier->minify();
+            return $this->cssOptimizer->optimize(
+                $cssSourcePaths !== [] ? $cssSourcePaths : $absolutePaths,
+                $combined,
+                $outputPath
+            );
         }
 
-        $minifier = new JS();
-        $minifier->add($combined);
-
-        return $minifier->minify();
+        return $this->jsOptimizer->optimize($combined, $minify, $mangle, $jsMangler, $jsManglerPath);
     }
 
     /**

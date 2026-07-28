@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace MinifyX\Pipeline;
 
+use MinifyX\Application\BuildResult;
+use MinifyX\Application\BuildRequest;
+use MinifyX\Application\BuildSignature;
 use MinifyX\Config;
 use MinifyX\Contract\AssetProcessorInterface;
 use MinifyX\Contract\CacheStoreInterface;
@@ -107,50 +110,63 @@ final class AssetPipeline
 
         $js = array_values(array_unique(array_merge($js, $this->listParam('jsSources'))));
         $css = array_values(array_unique(array_merge($css, $this->listParam('cssSources'))));
-        $js = array_map(fn (string $url): string => $this->parseUrl($url), $js);
-        $css = array_map(fn (string $url): string => $this->parseUrl($url), $css);
+        foreach ($js as $index => $url) {
+            $js[$index] = $this->parseUrl($url);
+        }
+        foreach ($css as $index => $url) {
+            $css[$index] = $this->parseUrl($url);
+        }
 
         return compact('js', 'css');
     }
 
     /**
      * @param list<string>|string $files
-     * @return array{
-     *   content: string,
-     *   filename: string,
-     *   url: string,
-     *   path: string,
-     *   fromCache: bool,
-     *   written: bool,
-     *   success: bool,
-     *   error: string
-     * }
+     * @return array<string, mixed>
      */
-    public function processAndSave(array|string $files, string $type, HookHostInterface $host, bool $forceMinify = false): array
+    public function processAndSave($files, string $type, HookHostInterface $host, bool $forceMinify = false)
     {
         $this->filetype = $type;
         $normalized = $this->normalizer->normalize($files);
         if ($normalized['paths'] === []) {
-            return $this->failure('No source files.');
+            return BuildResult::failure('No source files.')->toArray();
         }
 
         $absolute = $this->normalizer->toAbsolutePaths($normalized['paths']);
         if ($absolute === []) {
-            return $this->failure('No resolvable source files inside webroot.');
+            return BuildResult::failure('No resolvable source files inside webroot.')->toArray();
         }
 
         $minify = $forceMinify || (bool) $this->config->get('minify' . ucfirst($type), false);
+        $mangleJs = $type === 'js' && !empty($this->config->get('mangleJs', false));
         $basename = PathHelper::sanitizeFilename((string) $this->config->get($type . 'Filename', $type === 'css' ? 'styles' : 'scripts'));
         $extension = (string) $this->config->get($type . 'Ext', $type === 'css' ? '.css' : '.js');
+        $jsMangler = (string) $this->config->get('jsMangler', 'terser');
+        $jsManglerPath = (string) $this->config->get('jsManglerPath', '');
+        $hooks = $this->listParam('hooks');
 
-        $options = [
-            'minify' => $minify,
-            'type' => $type,
-            'queryParams' => $normalized['queryParams'],
-            'hooks' => $this->listParam('hooks'),
-        ];
+        /** @var array<string, string> $queryParams */
+        $queryParams = [];
+        foreach ($normalized['queryParams'] as $key => $value) {
+            if (is_scalar($value)) {
+                $queryParams[(string) $key] = (string) $value;
+            }
+        }
 
-        $fingerprint = $this->cache->fingerprint($absolute, $options);
+        $signature = new BuildSignature(
+            $absolute,
+            [
+                'minify' => $minify || $mangleJs,
+                'mangleJs' => $mangleJs,
+                'type' => $type,
+                'queryParams' => $queryParams,
+                'jsMangler' => $jsMangler,
+                'jsManglerPath' => $jsManglerPath,
+                'jsBackend' => $mangleJs ? $jsMangler : 'php-minify',
+            ],
+            $hooks
+        );
+        $fingerprint = $signature->hash((int) $this->config->get('hash_length', 10));
         $cachedName = $this->cache->lookupByFingerprint($basename, $fingerprint, $extension);
         $forceUpdate = (bool) $this->config->get('forceUpdate', false);
 
@@ -161,27 +177,28 @@ final class AssetPipeline
             $host->setFilename($this->filename);
             $host->setContent($this->content);
 
-            return [
-                'content' => $this->content,
-                'filename' => $this->filename,
-                'url' => rtrim((string) $this->config->get('cacheFolder'), '/') . '/' . $this->filename,
-                'path' => $this->cache->path($this->filename),
-                'fromCache' => true,
-                'written' => false,
-                'success' => true,
-                'error' => '',
-            ];
+            return $this->successResult($this->content, $this->filename, true, false)->toArray();
         }
+
+        $outputPath = $this->cache->path($basename . '_' . $fingerprint . $extension);
+        $request = new BuildRequest(
+            $absolute,
+            $type,
+            $minify,
+            $mangleJs,
+            $jsMangler,
+            $jsManglerPath,
+            $outputPath,
+            $basename,
+            $extension,
+            $queryParams
+        );
 
         try {
             $this->compilerCalls++;
-            $content = $this->processor->process($absolute, [
-                'minify' => $minify,
-                'type' => $type,
-                'queryParams' => $normalized['queryParams'],
-            ]);
+            $content = $this->processor->process($request->getAbsolutePaths(), $request->toProcessorOptions($hooks));
         } catch (\Throwable $e) {
-            return $this->failure($e->getMessage());
+            return BuildResult::failure($e->getMessage())->toArray();
         }
 
         $this->content = $content;
@@ -189,23 +206,13 @@ final class AssetPipeline
         $host->setFilename($this->filename);
         $host->setContent($this->content);
 
-        $hookList = $this->listParam('hooks');
+        $hookList = $hooks;
         if ($hookList !== []) {
             $this->hooks->run($hookList, $host);
             $this->content = $host->getContent();
             $this->filename = $host->getFilename();
             if ($this->filename === '') {
-                // Hook disabled file registration (e.g. cssToPage).
-                return [
-                    'content' => $this->content,
-                    'filename' => '',
-                    'url' => '',
-                    'path' => '',
-                    'fromCache' => false,
-                    'written' => false,
-                    'success' => true,
-                    'error' => '',
-                ];
+                return $this->successResult($this->content, '', false, false)->toArray();
             }
             $hookFingerprint = substr(hash('sha1', $fingerprint . '|' . $this->content), 0, 10);
             if (!str_contains($this->filename, '_')) {
@@ -217,28 +224,19 @@ final class AssetPipeline
         try {
             $safeName = PathHelper::sanitizeFilename($this->filename);
         } catch (\InvalidArgumentException $e) {
-            return $this->failure($e->getMessage());
+            return BuildResult::failure($e->getMessage())->toArray();
         }
         $this->filename = $safeName;
         $host->setFilename($this->filename);
 
         $written = $this->cache->write($this->filename, $this->content, $forceUpdate);
         if (!$written) {
-            return $this->failure('Could not write cache file.');
+            return BuildResult::failure('Could not write cache file.')->toArray();
         }
         $this->outputWrites++;
         $this->trackedFiles[] = $this->filename;
 
-        return [
-            'content' => $this->content,
-            'filename' => $this->filename,
-            'url' => rtrim((string) $this->config->get('cacheFolder'), '/') . '/' . $this->filename,
-            'path' => $this->cache->path($this->filename),
-            'fromCache' => false,
-            'written' => true,
-            'success' => true,
-            'error' => '',
-        ];
+        return $this->successResult($this->content, $this->filename, false, true)->toArray();
     }
 
     public function getContent(): string
@@ -308,32 +306,13 @@ final class AssetPipeline
         return array_values(array_map('strval', $value));
     }
 
-    /**
-     * @return array{
-     *   content: string,
-     *   filename: string,
-     *   url: string,
-     *   path: string,
-     *   fromCache: bool,
-     *   written: bool,
-     *   success: bool,
-     *   error: string
-     * }
-     */
-    private function failure(string $error): array
+    private function successResult(string $content, string $filename, bool $fromCache, bool $written): BuildResult
     {
-        $this->content = '';
-        $this->filename = '';
+        $url = $filename !== ''
+            ? rtrim((string) $this->config->get('cacheFolder'), '/') . '/' . $filename
+            : '';
+        $path = $filename !== '' ? $this->cache->path($filename) : '';
 
-        return [
-            'content' => '',
-            'filename' => '',
-            'url' => '',
-            'path' => '',
-            'fromCache' => false,
-            'written' => false,
-            'success' => false,
-            'error' => $error,
-        ];
+        return new BuildResult($content, $filename, $url, $path, $fromCache, $written, true, '');
     }
 }
